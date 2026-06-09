@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}
+العملات
+{% endblock %}
+
+{% block content %}
+
+<div class="sales-form"><h2>إضافة عملة جديدة</h2>
+
+<form method="POST">
+
+    <div class="form-row">
+
+        <div class="form-group">
+            <label>رمز العملة</label>
+            <input type="text" name="code" required>
+        </div>
+
+        <div class="form-group">
+            <label>اسم العملة</label>
+            <input type="text" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label>سعر الصرف</label>
+            <input type="number" step="0.01" name="rate" required>
+        </div>
+
+    </div>
+
+    <button class="btn-save" type="submit">
+        حفظ العملة
+    </button>
+
+</form>
+
+</div><div class="table-card"><h2>العملات الحالية</h2>
+
+<table>
+
+    <tr>
+        <th>الرمز</th>
+        <th>الاسم</th>
+        <th>سعر الصرف</th>
+        <th>العملة الأساسية</th>
+        <th>الإجراءات</th>
+    </tr>
+
+    {% for c in currencies %}
+
+    <tr>
+
+        <td>{{ c['code'] }}</td>
+
+        <td>{{ c['name'] }}</td>
+
+        <td>{{ c['rate'] }}</td>
+
+        <td>
+            {% if c['is_base'] == 1 %}
+                ⭐ أساسية
+            {% else %}
+                -
+            {% endif %}
+        </td>
+
+        <td>
+
+            <a class="btn-save"
+               href="/currencies/base/{{ c['id'] }}">
+               أساسية
+            </a>
+
+            <a class="btn-save"
+               href="/currencies/edit/{{ c['id'] }}">
+               تعديل
+            </a>
+
+            <a class="btn-delete"
+               href="/currencies/delete/{{ c['id'] }}"
+               onclick="return confirm('هل تريد حذف هذه العملة؟')">
+               حذف
+            </a>
+            
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+</div>{% endblock %}

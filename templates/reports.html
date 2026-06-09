@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}
+التقارير
+{% endblock %}
+
+{% block content %}
+
+<div class="stat-card">
+    <h3>عمليات اليوم</h3>
+    <h2>{{ today_sales }}</h2>
+</div>
+
+<div class="stat-card">
+    <h3>مبيعات اليوم</h3>
+    <h2>{{ today_amount }}</h2>
+</div>
+
+<div class="stat-card">
+    <h3>مبيعات الشهر</h3>
+    <h2>{{ month_amount }}</h2>
+</div>
+
+<h2>البحث والتصفية</h2>
+
+<form method="GET">
+
+    <input
+        type="text"
+        name="transaction_number"
+        placeholder="رقم العملية">
+
+    <input
+        type="date"
+        name="from_date">
+
+    <input
+        type="date"
+        name="to_date">
+
+    <button class="btn-save" type="submit">
+        بحث
+    </button>
+
+    <button
+        type="button"
+        class="btn-save"
+        onclick="window.print()"class="btn-save">
+
+        طباعة التقرير
+
+    </button>
+
+</form>
+
+<h2>العمليات</h2>
+
+<table>
+
+    <tr>
+        <th>رقم العملية</th>
+        <th>الخدمة</th>
+        <th>الباقة</th>
+        <th>السعر</th>
+        <th>القيمة المحلية</th>
+        <th>الموظف</th>
+        <th>التاريخ</th>
+    </tr>
+
+    {% for sale in last_sales %}
+
+    <tr>
+        <td>{{ sale['transaction_number'] }}</td>
+        <td>{{ sale['service'] }}</td>
+        <td>{{ sale['package'] }}</td>
+        <td>{{ sale['price'] }}</td>
+        <td>{{ sale['local_amount'] }}</td>
+        <td>{{ sale['employee'] }}</td>
+        <td>{{ sale['created_at'] }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<h2>تقرير الموظفين</h2>
+
+<table>
+
+    <tr>
+        <th>الموظف</th>
+        <th>عدد العمليات</th>
+        <th>إجمالي المبيعات</th>
+    </tr>
+
+    {% for e in employees_report %}
+
+    <tr>
+        <td>{{ e['employee'] }}</td>
+        <td>{{ e['total_sales'] }}</td>
+        <td>{{ e['total_amount'] }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+<h2>تقرير الخدمات</h2>
+
+<table>
+
+    <tr>
+        <th>الخدمة</th>
+        <th>عدد العمليات</th>
+        <th>إجمالي المبيعات</th>
+    </tr>
+
+    {% for s in service_report %}
+
+    <tr>
+        <td>{{ s['service'] }}</td>
+        <td>{{ s['total_sales'] }}</td>
+        <td>{{ s['total_amount'] }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

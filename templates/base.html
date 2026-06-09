@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+
+<title>{% block title %}{% endblock %}</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+      <body  class="hold-transition sidebar-mini">
+        {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="flash-message" class="flash-success">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
+
+        <div class="sidebar">
+          <div class="logo">
+      hamo store
+</div>
+
+<nav class="sidebar">
+
+    <a href="{{ url_for('dashboard') }}"
+       class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+       🏠 الرئيسية
+    </a>
+
+    <a href="{{ url_for('sales') }}"
+       class="{% if request.endpoint == 'sales' %}active{% endif %}">
+       💰 المبيعات
+    </a>
+    
+    <a href="{{ url_for('expenses') }}">
+    💸 المصروفات
+    </a>
+
+    <a href="{{ url_for('currencies') }}"
+       class="{% if request.endpoint == 'currencies' %}active{% endif %}">
+       💱 العملات
+    </a>
+
+    <a href="{{ url_for('employees') }}"
+       class="{% if request.endpoint == 'employees' %}active{% endif %}">
+       👥 الموظفين
+    </a>
+
+    <a href="{{ url_for('reports') }}"
+       class="{% if request.endpoint == 'reports' %}active{% endif %}">
+       📊 التقارير
+    </a>
+
+</nav>
+
+</div>
+<div class="content"><div class="topbar">
+
+    {% block titlebar %}
+    نظام إدارة المبيعات
+    {% endblock %}
+
+</div>
+<div class="topbar-left">
+
+    <span class="user-info">
+        👤 {{ session['full_name'] }}
+    </span>
+
+    <a href="/logout" class="logout-btn">
+        تسجيل الخروج
+    </a>
+
+</div>
+
+<div class="page-content">
+
+    {% block content %}
+    
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+    {% endblock %}
+
+</div>
+
+</div>
+<script>
+setTimeout(function(){
+    let msg = document.getElementById("flash-message");
+    if(msg){
+        msg.style.display = "none";
+    }
+}, 3000);
+</script>
+
+</body></html>

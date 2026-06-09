@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}
+المبيعات
+{% endblock %}
+
+{% block content %}
+
+<div class="stats-row"><div class="stat-card">
+    <h3>عمليات اليوم</h3>
+    <h2>0</h2>
+</div>
+
+<div class="stat-card">
+    <h3>مبيعات اليوم</h3>
+    <h2>0</h2>
+</div>
+
+<div class="stat-card">
+    <h3>المستخدم الحالي</h3>
+    <h2>{{ session['username'] }}</h2>
+</div>
+
+</div><div class="sales-form"><h2>تسجيل عملية بيع</h2>
+
+<form method="POST">
+
+    <div class="form-row">
+
+        <div class="form-group">
+            <label>الخدمة</label>
+            <select name="service" required>
+                <option>TikTok Coins</option>
+                <option>PUBG UC</option>
+                <option>Free Fire</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>الباقة / الكمية</label>
+            <input type="text" name="package" required>
+        </div>
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="form-group">
+            <label>رقم العملية</label>
+            <input type="text" name="transaction_number" required>
+        </div>
+<div class="form-group">
+    <label>العملة</label>
+    <select name="currency_id" required>
+</div>
+    {% for c in currencies %}
+
+    <option value="{{ c['id'] }}">
+        {{ c['code'] }} - {{ c['name'] }}
+    </option>
+
+    {% endfor %}
+
+</select>
+
+
+
+        <div class="form-group">
+            <label>السعر</label>
+            <input type="number" name="price" required>
+        </div>
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="form-group">
+            <label>اسم العميل </label>
+            <input type="text" name="customer_name">
+        </div>
+
+        <div class="form-group">
+            <label>رقم الهاتف </label>
+            <input type="text" name="phone">
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <label>الملاحظات</label>
+        <textarea name="notes" rows="3"></textarea>
+    </div>
+
+    <br>
+     
+
+    <button class="btn-save" type="submit">
+        حفظ العملية
+    </button>
+
+</form>
+
+</div><div class="table-card"><h2>آخر العمليات</h2>
+
+<table>
+
+    <tr>
+        <th>رقم العملية</th>
+        <th>الخدمة</th>
+        <th>الباقة</th>
+        <th>السعر</th>
+        <th>الموظف</th>
+        <th>فاتورة</th>
+
+    </tr>
+
+    {% for sale in sales %}
+ <tr>
+<td>{{ sale['transaction_number'] }}</td>
+        <td>{{ sale['service'] }}</td>
+        <td>{{ sale['price'] }}</td>
+        <td>{{ sale['employee'] }}</td>
+
+<td> <a href="/invoice/{{sale['id']}}" target="_blank"></a></td>
+
+ </tr>
+   
+       {% endfor %}
+
+
+</table>
+
+</div>{% endblock %}

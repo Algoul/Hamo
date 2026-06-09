@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}
+تعديل الموظف
+{% endblock %}
+
+{% block content %}
+
+<div class="employee-form"><h2>تعديل بيانات الموظف</h2>
+
+<form method="POST">
+
+    <div class="form-row">
+
+        <div class="form-group">
+            <label>الاسم الكامل</label>
+            <input type="text"
+                   name="full_name"
+                   value="{{ user['full_name'] }}"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>اسم المستخدم</label>
+            <input type="text"
+                   name="username"
+                   value="{{ user['username'] }}"
+                   required>
+        </div>
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="form-group">
+            <label>كلمة المرور</label>
+            <input type="text"
+                   name="password"
+                   value="{{ user['password'] }}"
+                   required>
+        </div>
+
+        <div class="form-group">
+            <label>الصلاحية</label>
+
+            <select name="role">
+
+                <option value="admin"
+                {% if user['role']=='admin' %}selected{% endif %}>
+                Admin
+                </option>
+
+                <option value="sales"
+                {% if user['role']=='sales' %}selected{% endif %}>
+                Sales
+                </option>
+
+                <option value="viewer"
+                {% if user['role']=='viewer' %}selected{% endif %}>
+                Viewer
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="form-group">
+
+            <label>الحالة</label>
+
+            <select name="status">
+
+                <option value="1"
+                {% if user['status']==1 %}selected{% endif %}>
+                نشط
+                </option>
+
+                <option value="0"
+                {% if user['status']==0 %}selected{% endif %}>
+                معطل
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+    <button class="btn-save" type="submit">
+        حفظ التعديلات
+    </button>
+
+    <a href="/employees" class="btn-delete">
+        إلغاء
+    </a>
+
+</form>
+
+</div>{% endblock %}

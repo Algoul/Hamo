@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>فاتورة</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#f8fafc;
+            padding:30px;
+        }
+
+        .invoice{
+            background:white;
+            padding:25px;
+            max-width:700px;
+            margin:auto;
+            border-radius:10px;
+            box-shadow:0 5px 20px rgba(0,0,0,.1);
+        }
+
+        .header{
+            text-align:center;
+            border-bottom:1px solid #eee;
+            padding-bottom:15px;
+        }
+
+        .header h2{
+            margin:0;
+            color:#2563eb;
+        }
+
+        .info{
+            margin-top:20px;
+        }
+
+        .info p{
+            margin:8px 0;
+        }
+
+        .print-btn{
+            margin-top:20px;
+            padding:10px 20px;
+            background:#2563eb;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="invoice">
+
+    <div class="header">
+        <h2>SA STORE</h2>
+        <p>فاتورة بيع رسمية</p>
+    </div>
+
+    <div class="info">
+        <p><b>رقم العملية:</b> {{ sale['transaction_number'] }}</p>
+        <p><b>الخدمة:</b> {{ sale['service'] }}</p>
+        <p><b>الباقة:</b> {{ sale['package'] }}</p>
+        <p><b>السعر:</b> {{ sale['price'] }}</p>
+        <p><b>القيمة المحلية:</b> {{ sale['local_amount'] }}</p>
+        <p><b>الموظف:</b> {{ sale['employee'] }}</p>
+        <p><b>التاريخ:</b> {{ sale['created_at'] }}</p>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">
+        طباعة الفاتورة
+    </button>
+
+</div>
+
+</body>
+</html>

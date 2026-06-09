@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}
+الموظفين
+{% endblock %}
+
+{% block content %}
+
+<div class="stats-row"><div class="stat-card">
+    <h3>إجمالي الموظفين</h3>
+    <h2>{{ total_users }}</h2>
+</div>
+
+<div class="stat-card">
+    <h3>الموظفون النشطون</h3>
+    <h2>{{ active_users }}</h2>
+</div>
+
+<div class="stat-card">
+    <h3>عدد المدراء</h3>
+    <h2>{{ admins }}</h2>
+</div>
+
+</div><div class="employee-form"><h2>إضافة موظف جديد</h2><form method="POST"><div class="form-row"><div class="form-group">
+<label>الاسم الكامل</label>
+<input type="text" name="full_name" required>
+</div><div class="form-group">
+<label>اسم المستخدم</label>
+<input type="text" name="username" required>
+</div></div><div class="form-row"><div class="form-group">
+<label>كلمة المرور</label>
+<input type="password" name="password" required>
+</div><div class="form-group">
+<label>الصلاحية</label><select name="role"><option value="admin">Admin</option>
+<option value="sales">Sales</option>
+<option value="viewer">Viewer</option></select></div></div><div class="form-row"><div class="form-group"><label>الحالة</label>
+
+<select name="status"><option value="1">نشط</option>
+<option value="0">معطل</option></select></div></div><button class="btn-save" type="submit">
+إضافة الموظف
+</button></form></div><div class="table-card"><h2>قائمة الموظفين</h2><table><tr>
+<th>#</th>
+<th>الاسم</th>
+<th>اسم المستخدم</th>
+<th>الصلاحية</th>
+<th>الحالة</th>
+<th>تاريخ الإنشاء</th>
+<th>الإجراءات</th>
+</tr>{% for user in users %}
+
+<tr><td>{{ user['id'] }}</td>
+
+<td>{{ user['full_name'] }}</td>
+
+<td>{{ user['username'] }}</td>
+
+<td>{{ user['role'] }}</td>
+
+<td>
+    {% if user['status'] == 1 %}
+        نشط
+    {% else %}
+        معطل
+    {% endif %}
+</td>
+
+<td>{{ user['created_at'] }}</td>
+
+<td>
+
+    <a class="btn-save"
+       href="/employees/edit/{{ user['id'] }}">
+       تعديل
+    </a>
+
+    <a class="btn-delete"
+       href="/employees/delete/{{ user['id'] }}"
+       onclick="return confirm('هل تريد حذف الموظف؟')">
+       حذف
+    </a>
+
+</td>
+
+</tr>{% endfor %}
+
+</table></div>{% endblock %}

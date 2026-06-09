@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+لوحة التحكم
+{% endblock %}
+
+{% block content %}
+
+<div class="stats-row"><div class="stat-card">
+    <h3>عمليات اليوم</h3>
+    <h2>{{ today_sales }}</h2>
+</div>
+
+<div class="stat-card">
+    <h3>مبيعات اليوم</h3>
+    <h2>{{ today_amount }}</h2>
+</div>
+
+<div class="stat-card">
+    <h3>المستخدم الحالي</h3>
+    <h2>{{ session['username'] }}</h2>
+</div>
+
+</div>{% endblock %}
