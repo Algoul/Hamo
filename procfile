@@ -1,0 +1,1 @@
+wseb: gunicorn app:app
