@@ -167,6 +167,26 @@ def sales():
         currencies=currencies,
         services=services
     )
+
+@app.route('/sales/delete/<int:id>')
+def delete_sale(id):
+
+   
+
+   conn = sqlite3.connect('database.db')
+   cursor = conn.cursor()
+
+   cursor.execute(
+    "DELETE FROM sales WHERE id=?",
+    (id,)
+   )
+
+   conn.commit()
+   conn.close()
+
+   return redirect('/sales')
+
+
 @app.route('/services', methods=['GET', 'POST'])
 def services():
 
@@ -279,10 +299,30 @@ ORDER BY name
     conn.close()
 
     return render_template(
-    'purchases.html',
+    "purchases.html",
     purchases=purchases_list,
     currencies=currencies
-)
+    )
+
+@app.route('/purchases/delete/<int:id>')
+def delete_purchase(id):
+
+  if session.get('role') != 'admin':
+    return "غير مصرح", 403
+
+  conn = sqlite3.connect('database.db')
+  cursor = conn.cursor()
+
+  cursor.execute(
+    "DELETE FROM purchases WHERE id=?",
+    (id,)
+ )
+
+  conn.commit()
+  conn.close()
+
+  return redirect('/purchases')
+
 @app.route('/currencies', methods=['GET', 'POST'])
 def currencies():
 

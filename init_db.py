@@ -24,7 +24,7 @@ CREATE TABLE sales (
     notes TEXT,
     employee TEXT,
     created_at TEXT
-)
+               )
 ''')
 
 # ======================

@@ -53,6 +53,7 @@
     <th>الإجمالي</th>
     <th>المورد</th>
     <th>التاريخ</th>
+    <th> اجراء</th>
 </tr>
 
 {% for p in purchases %}
@@ -64,6 +65,16 @@
     <td>{{ p['total_amount'] }}</td>
     <td>{{ p['supplier'] }}</td>
     <td>{{ p['created_at'] }}</td>
+    <td>
+{% if session.get('role') == 'admin' %}
+<a href="/purchases/delete/{{ p['id'] }}"
+   onclick="return confirm('هل تريد حذف المشتريات؟')"
+   style="color:red;">
+   🗑 حذف
+</a>
+{% endif %}
+</td>
+
 </tr>
 
 {% endfor %}

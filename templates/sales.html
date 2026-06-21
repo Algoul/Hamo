@@ -119,34 +119,43 @@
 
 </form>
 
-</div><div class="table-card"><h2>آخر العمليات</h2>
+<div class="table-card"><h2>آخر العمليات</h2><table><tr>
+    <th>رقم العملية</th>
+    <th>الخدمة</th>
+    <th>الباقة</th>
+    <th>السعر</th>
+    <th>الموظف</th>
+    <th>فاتورة</th>
+    <th>إجراء</th>
+</tr>{% for sale in sales %}
 
-<table>
+<tr><td>{{ sale['transaction_number'] }}</td>
 
-    <tr>
-        <th>رقم العملية</th>
-        <th>الخدمة</th>
-        <th>الباقة</th>
-        <th>السعر</th>
-        <th>الموظف</th>
-        <th>فاتورة</th>
+<td>{{ sale['service'] }}</td>
 
-    </tr>
+<td>{{ sale['package'] }}</td>
 
-    {% for sale in sales %}
- <tr>
-<td>{{ sale['transaction_number'] }}</td>
-        <td>{{ sale['service'] }}</td>
-        <td>{{ sale['price'] }}</td>
-        <td>{{ sale['employee'] }}</td>
+<td>{{ sale['price'] }}</td>
 
-<td> <a href="/invoice/{{sale['id']}}" target="_blank"></a></td>
+<td>{{ sale['employee'] }}</td>
 
- </tr>
-   
-       {% endfor %}
+<td>
+    <a href="/invoice/{{ sale['id'] }}" target="_blank">
+        عرض
+    </a>
+</td>
 
+<td>
+    {% if session.get('role') %}
+    <a href="/sales/delete/{{ sale['id'] }}"
+       onclick="return confirm('هل تريد حذف العملية؟')"
+       style="color:red;">
+       🗑 حذف
+    </a>
+    {% endif %}
+</td>
 
-</table>
+</tr>{% endfor %}
 
-</div>{% endblock %}
+</table></div>
+{% endblock %}
