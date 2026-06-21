@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}
+كشف الحساب
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>كشف حساب: {{ account['name'] }}</h2>
+
+    <p>
+        العملة: {{ account['currency'] }} |
+        الرصيد الحالي: <b>{{ account['balance'] }}</b>
+    </p>
+
+</div>
+
+<div class="card">
+
+    <h3>حركات الحساب</h3>
+
+    <table>
+
+        <tr>
+            <th>النوع</th>
+            <th>المبلغ</th>
+            <th>الرصيد بعد العملية</th>
+            <th>التاريخ</th>
+        </tr>
+
+        {% for t in transactions %}
+
+        <tr>
+
+            <td>
+                {% if t['type'] == 'deposit' %}
+                    🟢 إيداع
+                {% else %}
+                    🔴 سحب
+                {% endif %}
+            </td>
+
+            <td>{{ t['amount'] }}</td>
+            <td>{{ t['balance_after'] }}</td>
+            <td>{{ t['created_at'] }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+<div class="card">
+
+    <button class="btn-save" onclick="window.print()">
+        طباعة التقرير
+    </button>
+
+</div>
+
+{% endblock %}

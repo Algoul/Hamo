@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+تسجيل دفعة
+{% endblock %}
+
+{% block content %}
+
+<h2>تسجيل دفعة للعميل</h2><div class="stat-card">
+    <h3>{{ customer['name'] }}</h3>
+    <h2>المتبقي: {{ customer['remaining_amount'] }}</h2>
+</div><form method="POST"><input
+    type="number"
+    step="0.01"
+    name="payment"
+    placeholder="المبلغ المدفوع"
+    required>
+
+<button
+    type="submit"
+    class="btn-save">
+
+    حفظ الدفعة
+
+</button>
+
+</form>{% endblock %}

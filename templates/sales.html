@@ -30,11 +30,30 @@
         <div class="form-group">
             <label>الخدمة</label>
             <select name="service" required>
-                <option>TikTok Coins</option>
-                <option>PUBG UC</option>
-                <option>Free Fire</option>
-            </select>
+            
+                   {% for s in services %}
+                   <option value="{{ s['name'] }}">
+                   {{ s['name'] }}
+                   </option>
+                   {% endfor %}
+                       </select >    
         </div>
+<div class="form-group">
+    <label>نوع الفيزا</label>
+    <select name="visa_type" required>
+
+        <option value="">اختر الفيزا</option>
+
+        <option value="Visa Me">
+            Visa Me
+        </option>
+
+        <option value="Visa Gafar">
+            Visa Gafar
+        </option>
+
+    </select>
+</div>
 
         <div class="form-group">
             <label>الباقة / الكمية</label>

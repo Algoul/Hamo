@@ -23,36 +23,60 @@
 </div>
 
 <nav class="sidebar">
+{% set perms = session.get('permissions', '').split(',') %}
+<span class="user-info">
+        👤 {{ session['full_name'] }}
+    </span>
+<a href="{{ url_for('dashboard') }}">🏠 الرئيسية</a>
 
-    <a href="{{ url_for('dashboard') }}"
-       class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
-       🏠 الرئيسية
-    </a>
+<a href="{{ url_for('services') }}">
+    🛒 الخدمات
+</a>
+{% if 'sales' in perms %}
+<a href="{{ url_for('sales') }}">💰 المبيعات</a>
+{% endif %}
 
-    <a href="{{ url_for('sales') }}"
-       class="{% if request.endpoint == 'sales' %}active{% endif %}">
-       💰 المبيعات
-    </a>
+{% if 'sales' in perms %}
+<a href="{{ url_for('purchases') }}">💰 المشتريات</a>
+{% endif %}
+
+
+
+{% if 'expenses' in perms %}
+<a href="{{ url_for('expenses') }}">💸 المصروفات</a>
+{% endif %}
+
+{% if 'currencies' in perms %}
+<a href="{{ url_for('currencies') }}">💱 العملات</a>
+{% endif %}
+
+<a href="{{ url_for('customers') }}"
+   class="{% if request.endpoint == 'customers' %}active{% endif %}">
+   👤 العملاء
+</a>
+
+<a href="{{ url_for('accounts') }}"
+   class="{% if request.endpoint == 'accounts' %}active{% endif %}">
+   🏦 الحسابات
+</a>
+
+
+{% if 'employees' in perms %}
+<a href="{{ url_for('employees') }}">👥 الموظفين</a>
+{% endif %}
+
+{% if 'reports' in perms %}
+<a href="{{ url_for('reports') }}">📊 التقارير</a>
+{% endif %}
+<div class="topbar-left">
+
     
-    <a href="{{ url_for('expenses') }}">
-    💸 المصروفات
+
+    <a href="/logout" class="logout-btn">
+        تسجيل الخروج
     </a>
 
-    <a href="{{ url_for('currencies') }}"
-       class="{% if request.endpoint == 'currencies' %}active{% endif %}">
-       💱 العملات
-    </a>
-
-    <a href="{{ url_for('employees') }}"
-       class="{% if request.endpoint == 'employees' %}active{% endif %}">
-       👥 الموظفين
-    </a>
-
-    <a href="{{ url_for('reports') }}"
-       class="{% if request.endpoint == 'reports' %}active{% endif %}">
-       📊 التقارير
-    </a>
-
+</div>
 </nav>
 
 </div>
@@ -63,17 +87,7 @@
     {% endblock %}
 
 </div>
-<div class="topbar-left">
 
-    <span class="user-info">
-        👤 {{ session['full_name'] }}
-    </span>
-
-    <a href="/logout" class="logout-btn">
-        تسجيل الخروج
-    </a>
-
-</div>
 
 <div class="page-content">
 

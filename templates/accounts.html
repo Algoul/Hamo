@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}
+الحسابات الخاصة
+{% endblock %}
+
+{% block content %}
+
+<div class="stat-card">
+    <h3>عدد الحسابات</h3>
+    <h2>{{ accounts|length }}</h2>
+</div><h2>إضافة حساب جديد</h2><form method="POST"><input
+    type="text"
+    name="name"
+    placeholder="اسم الحساب"
+    required>
+
+<input
+    type="text"
+    name="currency"
+    placeholder="العملة (USD - SDG - EGP)"
+    required>
+
+<input
+    type="number"
+    step="0.01"
+    name="balance"
+    placeholder="الرصيد الافتتاحي"
+    required>
+
+<button
+    type="submit"
+    class="btn-save">
+
+    حفظ الحساب
+
+</button>
+
+</form><h2>الحسابات</h2><table><tr>
+    <th>اسم الحساب</th>
+    <th>العملة</th>
+    <th>الرصيد الحالي</th>
+    <th>الإجراءات</th>
+</tr>
+
+{% for account in accounts %}
+
+<tr>
+
+    <td>{{ account['name'] }}</td>
+
+    <td>{{ account['currency'] }}</td>
+
+    <td>{{ account['balance'] }}</td>
+
+    
+
+        <td>
+
+    <form method="POST" action="/accounts/deposit/{{ account['id'] }}" style="display:inline;">
+        <input type="number" name="amount" placeholder="إيداع" required>
+        <button class="btn-save">إيداع</button>
+    </form>
+
+    <form method="POST" action="/accounts/withdraw/{{ account['id'] }}" style="display:inline;">
+        <input type="number" name="amount" placeholder="سحب" required>
+        <button class="btn-delete">سحب</button>
+    </form>
+<a href="/accounts/report/{{ account['id'] }}" class="btn-save">
+    كشف الحساب
+</a>
+
+</td>
+
+
+        </a>
+
+    
+</tr>
+
+{% endfor %}
+
+</table>{% endblock %}

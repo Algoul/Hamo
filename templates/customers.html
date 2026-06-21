@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}
+العملاء
+{% endblock %}
+
+{% block content %}
+
+<div class="stat-card">
+    <h3>عدد العملاء</h3>
+    <h2>{{ customers|length }}</h2>
+</div><h2>إضافة عميل</h2><form method="POST"><input
+    type="text"
+    name="name"
+    placeholder="اسم العميل"
+    required>
+
+<input
+    type="text"
+    name="phone"
+    placeholder="رقم الهاتف">
+
+<input
+    type="number"
+    step="0.01"
+    name="total_amount"
+    placeholder="المبلغ المطلوب"
+    required>
+
+<input
+    type="text"
+    name="notes"
+    placeholder="ملاحظات">
+
+<button
+    type="submit"
+    class="btn-save">
+
+    حفظ العميل
+
+</button>
+
+</form><h2>قائمة العملاء</h2><table><tr>
+    <th>الاسم</th>
+    <th>الهاتف</th>
+    <th>المطلوب</th>
+    <th>المدفوع</th>
+    <th>المتبقي</th>
+    <th>التاريخ</th>
+    <th>إجراء</th>
+    <th>حذف</th>
+</tr>
+
+{% for customer in customers %}
+
+<tr>
+    <td>{{ customer['name'] }}</td>
+    <td>{{ customer['phone'] }}</td>
+    <td>{{ customer['total_amount'] }}</td>
+    <td>{{ customer['paid_amount'] }}</td>
+    <td>{{ customer['remaining_amount'] }}</td>
+    <td>{{ customer['created_at'] }}</td>
+    <td>
+    <a href="/customers/payment/{{ customer['id'] }}"
+       class="btn-save">
+       تسجيل دفعة
+    </a>
+    </td>
+    <td>
+    <a href="/customers/delete/{{ customer['id'] }}"
+       onclick="return confirm('هل أنت متأكد من حذف العميل؟')"
+       class="btn-delete">
+
+        حذف
+
+    </a>
+    </td>
+
+
+</tr>
+
+{% endfor %}
+
+</table>{% endblock %}

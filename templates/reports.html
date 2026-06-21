@@ -15,10 +15,40 @@
     <h3>مبيعات اليوم</h3>
     <h2>{{ today_amount }}</h2>
 </div>
-
+<div class="stat-card">
+    <h3>إجمالي المصروفات</h3>
+    <h2>{{ expenses_total }}</h2>
+</div>
 <div class="stat-card">
     <h3>مبيعات الشهر</h3>
     <h2>{{ month_amount }}</h2>
+</div>
+<div class="stat-card">
+    <h3>إجمالي المشتريات</h3>
+    <h2>{{ purchases_total }}</h2>
+</div>
+<div class="stat-card">
+    <h3>صافي الربح</h3>
+    <h2>{{ net_profit }}</h2>
+</div>
+<div class="report-tabs">
+
+    <button onclick="showSection('sales-report')">
+        العمليات
+    </button>
+
+    <button onclick="showSection('finance-report')">
+        الملخص المالي
+    </button>
+
+    <button onclick="showSection('employees-report')">
+        الموظفين
+    </button>
+
+    <button onclick="showSection('services-report')">
+        الخدمات
+    </button>
+
 </div>
 
 <h2>البحث والتصفية</h2>
@@ -52,7 +82,7 @@
     </button>
 
 </form>
-
+<div id="sales-report" class="report-section">
 <h2>العمليات</h2>
 
 <table>
@@ -65,6 +95,7 @@
         <th>القيمة المحلية</th>
         <th>الموظف</th>
         <th>التاريخ</th>
+        <th>نوع الفيزا</th>
     </tr>
 
     {% for sale in last_sales %}
@@ -74,6 +105,7 @@
         <td>{{ sale['service'] }}</td>
         <td>{{ sale['package'] }}</td>
         <td>{{ sale['price'] }}</td>
+        <td>{{ sale['visa_type'] }}</td>
         <td>{{ sale['local_amount'] }}</td>
         <td>{{ sale['employee'] }}</td>
         <td>{{ sale['created_at'] }}</td>
@@ -81,8 +113,45 @@
 
     {% endfor %}
 
-</table>
 
+</table></div>
+<div id="finance-report"
+     class="report-section"
+     style="display:none"
+>
+<h2>الملخص المالي</h2>
+
+<table>
+    <tr>
+        <th>البند</th>
+        <th>القيمة</th>
+    </tr>
+
+    <tr>
+        <td>مبيعات الشهر</td>
+        <td>{{ month_amount }}</td>
+    </tr>
+
+    <tr>
+        <td>إجمالي المشتريات</td>
+        <td>{{ purchases_total }}</td>
+    </tr>
+
+    <tr>
+        <td>إجمالي المصروفات</td>
+        <td>{{ expenses_total }}</td>
+    </tr>
+
+    <tr>
+        <td><strong>صافي الربح</strong></td>
+        <td><strong>{{ net_profit }}</strong></td>
+    </tr>
+</table>
+</div>
+<div div id="employees-report"
+     class="report-section"
+     style="display:none"
+>
 <h2>تقرير الموظفين</h2>
 
 <table>
@@ -104,7 +173,8 @@
     {% endfor %}
 
 </table>
-
+</div>
+<div>
 <h2>تقرير الخدمات</h2>
 
 <table>
@@ -126,5 +196,25 @@
     {% endfor %}
 
 </table>
+</div>
+
+<script>
+
+function showSection(id){
+
+    let sections =
+        document.querySelectorAll('.report-section');
+
+    sections.forEach(function(section){
+
+        section.style.display = 'none';
+
+    });
+
+    document.getElementById(id).style.display =
+        'block';
+}
+
+</script>
 
 {% endblock %}

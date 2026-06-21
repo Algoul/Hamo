@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+الخدمات
+{% endblock %}
+
+{% block content %}
+
+<h2>إدارة الخدمات</h2><form method="POST"><input
+    type="text"
+    name="name"
+    placeholder="اسم الخدمة"
+    required>
+
+<button class="btn-save" type="submit">
+    إضافة خدمة
+</button>
+
+</form><br><table><tr>
+    
+    <th>اسم الخدمة</th>
+    <th>إجراء</th>
+</tr>
+
+{% for service in services %}
+
+<tr>
+   
+    <td>{{ service['name'] }}</td>
+
+    <td>
+        <a href="/services/delete/{{ service['id'] }}">
+            حذف
+        </a>
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</table>{% endblock %}

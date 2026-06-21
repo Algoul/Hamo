@@ -33,6 +33,7 @@ def login():
             session['username'] = user['username']
             session['full_name'] = user['full_name']
             session['role'] = user['role']
+            session['permissions'] = user['permissions']
 
             conn = sqlite3.connect('database.db')
             cursor = conn.cursor()
@@ -82,6 +83,7 @@ def sales():
         service = request.form['service']
         package = request.form['package']
         price = request.form['price']
+        visa_type = request.form['visa_type']
         phone = request.form.get('phone', '')
         notes = request.form.get('notes', '')
         
@@ -113,6 +115,7 @@ def sales():
                     service,
                     package,
                     price,
+                    visa_type,
                     currency_id,
                     exchange_rate,
                     local_amount,
@@ -123,7 +126,7 @@ def sales():
 
 
                 )
-                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
             """,
             (
                 transaction_number,
@@ -131,6 +134,7 @@ def sales():
                 service,
                 package,
                 price,
+                visa_type,
                 currency_id,
                 exchange_rate,
                 local_amount,
@@ -151,15 +155,134 @@ def sales():
     currencies = cursor.execute(
     "SELECT * FROM currencies ORDER BY name"
      ).fetchall()
+   
+    services = cursor.execute(
+    "SELECT * FROM services ORDER BY name"
+).fetchall()
+    print(services)
     conn.close()
-     
     return render_template(
         'sales.html',
         sales=sales_data,
-        currencies=currencies
+        currencies=currencies,
+        services=services
+    )
+@app.route('/services', methods=['GET', 'POST'])
+def services():
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+
+        name = request.form['name']
+
+        cursor.execute(
+            "INSERT INTO services (name) VALUES (?)",
+            (name,)
+        )
+
+        conn.commit()
+
+    services = cursor.execute(
+        "SELECT * FROM services ORDER BY name"
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "services.html",
+        services=services
+    )
+@app.route('/services/delete/<int:id>')
+def delete_service(id):
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM services WHERE id=?",
+        (id,)
     )
 
+    conn.commit()
+    conn.close()
 
+    return redirect('/services')
+@app.route('/purchases', methods=['GET', 'POST'])
+def purchases():
+
+    if 'user_id' not in session:
+     return redirect('/')
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+
+     currency_id = request.form['currency_id']
+     quantity = float(request.form['quantity'])
+     purchase_rate = float(request.form['purchase_rate'])
+
+     total_amount = quantity * purchase_rate
+
+     supplier = request.form['supplier']
+     notes = request.form['notes']
+
+     cursor.execute("""
+    INSERT INTO purchases
+    (
+        currency_id,
+        quantity,
+        purchase_rate,
+        total_amount,
+        supplier,
+        notes,
+        employee,
+        created_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+    """,
+    (
+        currency_id,
+        quantity,
+        purchase_rate,
+        total_amount,
+        supplier,
+        notes,
+        session['username']
+    ))
+
+     conn.commit()
+     flash("تم حفظ عملية الشراء بنجاح")
+
+    purchases_list = cursor.execute("""
+    SELECT purchases.*,
+       currencies.name as currency_name
+FROM purchases
+LEFT JOIN currencies
+ON purchases.currency_id = currencies.id
+ORDER BY purchases.id DESC
+""").fetchall()
+
+    currencies = cursor.execute("""
+SELECT *
+FROM currencies
+ORDER BY name
+""").fetchall()
+
+    conn.close()
+
+    return render_template(
+    'purchases.html',
+    purchases=purchases_list,
+    currencies=currencies
+)
 @app.route('/currencies', methods=['GET', 'POST'])
 def currencies():
 
@@ -313,8 +436,13 @@ WHERE 1=1
 SELECT IFNULL(SUM(amount),0)
 FROM expenses
 """).fetchone()[0]
+    purchases_total = cursor.execute("""
+SELECT IFNULL(SUM(total_amount),0)
+FROM purchases
+""").fetchone()[0]
 
-    net_profit = month_amount - expenses_total
+
+    net_profit = month_amount - purchases_total - expenses_total
     
     expenses = cursor.execute("""
 SELECT *
@@ -351,11 +479,140 @@ ORDER BY id DESC
     today_amount=today_amount,
     month_amount=month_amount,
     expenses_total=expenses_total,
+    purchases_total=purchases_total,
     net_profit=net_profit,
     expenses =expenses,
     employees_report=employees_report,
     service_report=service_report
 )
+
+@app.route('/customers', methods=['GET', 'POST'])
+def customers():
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+
+        name = request.form['name']
+        phone = request.form['phone']
+        total_amount = request.form['total_amount']
+        notes = request.form['notes']
+
+        cursor.execute("""
+        INSERT INTO customers
+        (
+            name,
+            phone,
+            total_amount,
+            paid_amount,
+            remaining_amount,
+            notes,
+            created_at
+        )
+        VALUES (?, ?, ?, 0, ?, ?, datetime('now'))
+        """,
+        (
+            name,
+            phone,
+            total_amount,
+            total_amount,
+            notes
+        ))
+
+        conn.commit()
+
+        flash("تم إضافة العميل بنجاح")
+
+    customers = cursor.execute("""
+    SELECT *
+    FROM customers
+    ORDER BY id DESC
+    """).fetchall()
+
+    conn.close()
+
+    return render_template(
+        'customers.html',
+        customers=customers
+)
+@app.route('/customers/delete/<int:id>')
+def delete_customer(id):
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM customers WHERE id=?",
+        (id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    flash("تم حذف العميل بنجاح")
+
+    return redirect('/customers')
+
+@app.route('/customers/payment/<int:id>',
+           methods=['GET', 'POST'])
+def customer_payment(id):
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    customer = cursor.execute(
+        "SELECT * FROM customers WHERE id=?",
+        (id,)
+    ).fetchone()
+
+    if request.method == 'POST':
+
+        payment = float(request.form['payment'])
+
+        new_paid = customer['paid_amount'] + payment
+
+        new_remaining = (
+            customer['total_amount']
+            - new_paid
+        )
+
+        cursor.execute("""
+        UPDATE customers
+        SET paid_amount=?,
+            remaining_amount=?
+        WHERE id=?
+        """,
+        (
+            new_paid,
+            new_remaining,
+            id
+        ))
+
+        conn.commit()
+        conn.close()
+
+        flash("تم تسجيل الدفعة")
+
+        return redirect('/customers')
+
+    conn.close()
+
+    return render_template(
+        "customer_payment.html",
+        customer=customer
+    )
 
 @app.route('/employees', methods=['GET', 'POST'])
 def employees():
@@ -374,7 +631,7 @@ def employees():
      full_name = request.form['full_name']
      username = request.form['username']
      password = request.form['password']
-     role = request.form['role']
+     permissions = ",".join(request.form.getlist("permissions"))    
      status = request.form['status']
 
      cursor.execute("""
@@ -384,16 +641,18 @@ def employees():
         password,
         full_name,
         role,
+        permissions,
         status,
         created_at
      )
-     VALUES (?, ?, ?, ?, ?, datetime('now'))
+     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
     """,
      (
         username,
         password,
         full_name,
-        role,
+        'sale',
+        permissions,
         status
      ))
 
@@ -438,12 +697,13 @@ def edit_employee(id):
     cursor = conn.cursor()
 
     if request.method == 'POST':
-
+     permissions = ",".join(request.form.getlist("permissions "))
      cursor.execute("""
     UPDATE users
     SET full_name=?,
         username=?,
         password=?,
+        permissions=?,
         role=?,
         status=?
     WHERE id=?
@@ -452,6 +712,7 @@ def edit_employee(id):
         request.form['full_name'],
         request.form['username'],
         request.form['password'],
+        permissions,
         request.form['role'],
         request.form['status'],
         id
@@ -548,6 +809,168 @@ def delete_employee(id):
  flash("تم حذف الموظف")
 
  return redirect('/employees')
+@app.route('/accounts', methods=['GET', 'POST'])
+def accounts():
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+
+        name = request.form['name']
+        currency = request.form['currency']
+        balance = request.form['balance']
+
+        cursor.execute("""
+        INSERT INTO accounts
+        (
+            name,
+            currency,
+            balance,
+            created_at
+        )
+        VALUES
+        (
+            ?, ?, ?, datetime('now')
+        )
+        """,
+        (
+            name,
+            currency,
+            balance
+        ))
+
+        account_id = cursor.lastrowid
+
+        cursor.execute("""
+        INSERT INTO account_transactions
+        (
+            account_id,
+            type,
+            amount,
+            balance_after,
+            notes,
+            created_at
+        )
+        VALUES
+        (
+            ?, 'رصيد افتتاحي', ?, ?, '',
+            datetime('now')
+        )
+        """,
+        (
+            account_id,
+            balance,
+            balance
+        ))
+
+        conn.commit()
+
+        flash("تم إنشاء الحساب بنجاح")
+
+    accounts = cursor.execute("""
+    SELECT *
+    FROM accounts
+    ORDER BY id DESC
+    """).fetchall()
+
+    conn.close()
+
+    return render_template(
+        'accounts.html',
+        accounts=accounts
+    )
+@app.route('/accounts/deposit/<int:id>', methods=['POST'])
+def deposit(id):
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    amount = float(request.form['amount'])
+
+    cursor.execute("SELECT balance FROM accounts WHERE id=?", (id,))
+    account = cursor.fetchone()
+    old_balance = account[0]
+
+    new_balance = old_balance + amount
+
+    cursor.execute("""
+    UPDATE accounts
+    SET balance=?
+    WHERE id=?
+    """, (new_balance, id))
+
+    cursor.execute("""
+    INSERT INTO account_transactions
+    (account_id, type, amount, balance_after, created_at)
+    VALUES (?, 'deposit', ?, ?, datetime('now'))
+    """, (id, amount, new_balance))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/accounts')
+@app.route('/accounts/withdraw/<int:id>', methods=['POST'])
+def withdraw(id):
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    amount = float(request.form['amount'])
+
+    cursor.execute("SELECT balance FROM accounts WHERE id=?", (id,))
+    account = cursor.fetchone()
+    old_balance = account[0]
+
+    new_balance = old_balance - amount
+
+    cursor.execute("""
+    UPDATE accounts
+    SET balance=?
+    WHERE id=?
+    """, (new_balance, id))
+
+    cursor.execute("""
+    INSERT INTO account_transactions
+    (account_id, type, amount, balance_after, created_at)
+    VALUES (?, 'withdraw', ?, ?, datetime('now'))
+    """, (id, amount, new_balance))
+
+    conn.commit()
+    conn.close()
+
+    return redirect('/accounts')
+@app.route('/accounts/report/<int:id>')
+def account_report(id):
+
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    account = cursor.execute(
+        "SELECT * FROM accounts WHERE id=?",
+        (id,)
+    ).fetchone()
+
+    transactions = cursor.execute("""
+    SELECT *
+    FROM account_transactions
+    WHERE account_id=?
+    ORDER BY id DESC
+    """, (id,)).fetchall()
+
+    conn.close()
+
+    return render_template(
+        'account_report.html',
+        account=account,
+        transactions=transactions
+    )
+
 
 @app.route('/logout')
 def logout():

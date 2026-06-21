@@ -31,10 +31,24 @@
 <label>كلمة المرور</label>
 <input type="password" name="password" required>
 </div><div class="form-group">
-<label>الصلاحية</label><select name="role"><option value="admin">Admin</option>
-<option value="sales">Sales</option>
-<option value="viewer">Viewer</option></select></div></div><div class="form-row"><div class="form-group"><label>الحالة</label>
+<label>صلاحيات الصفحات</label>
 
+
+
+
+<div class="permissions-box">
+
+    <label><input type="checkbox" name="permissions" value="sales"> المبيعات</label>
+
+    <label><input type="checkbox" name="permissions" value="reports"> التقارير</label>
+
+    <label><input type="checkbox" name="permissions" value="currencies"> العملات</label>
+
+    <label><input type="checkbox" name="permissions" value="employees"> الموظفون</label>
+
+    <label><input type="checkbox" name="permissions" value="expenses"> المصروفات</label>
+
+</div>
 <select name="status"><option value="1">نشط</option>
 <option value="0">معطل</option></select></div></div><button class="btn-save" type="submit">
 إضافة الموظف
