@@ -11,7 +11,7 @@ def get_db_connection():
             os.environ.get("DATABASE_URL"),
             cursor_factory=RealDictCursor
         )
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
 
     error = None
