@@ -1,10 +1,8 @@
 import psycopg2
+import os
 
 conn = psycopg2.connect(
-    host="localhost",
-    database="hamo_store",
-    user="postgres",
-    password="YOUR_PASSWORD"
+            os.environ.get("DATABASE_URL")
 )
 
 cursor = conn.cursor()
