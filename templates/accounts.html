@@ -41,6 +41,7 @@
     <th>العملة</th>
     <th>الرصيد الحالي</th>
     <th>الإجراءات</th>
+    <th>حذف</th>
 </tr>
 
 {% for account in accounts %}
@@ -66,15 +67,25 @@
         <input type="number" name="amount" placeholder="سحب" required>
         <button class="btn-delete">سحب</button>
     </form>
-<a href="/accounts/report/{{ account['id'] }}" class="btn-save">
+    <form>
+        <br>
+    </form >
+<a href="/accounts/report/{{ account['id'] }}" class="btn-save" style="display:inline;">
     كشف الحساب
 </a>
 
 </td>
 
 
-        </a>
-
+<td>
+    {% if session.get('role') == 'admin' %}
+    <a href="/accounts/delete/{{ account['id'] }}"
+       onclick="return confirm('هل تريد حذف الحساب؟')"
+       style="color:red;">
+       🗑 حذف
+    </a>
+    {% endif %}
+</td>
     
 </tr>
 

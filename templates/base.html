@@ -1,15 +1,17 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
 
 <title>{% block title %}{% endblock %}</title>
 
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
 </head>
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}">
-      <body  class="hold-transition sidebar-mini">
-        {% with messages = get_flashed_messages() %}
+
+<body class="hold-transition sidebar-mini">
+
+{% with messages = get_flashed_messages() %}
     {% if messages %}
         <div id="flash-message" class="flash-success">
             {{ messages[0] }}
@@ -17,96 +19,113 @@
     {% endif %}
 {% endwith %}
 
-        <div class="sidebar">
-          <div class="logo">
-      hamo store
-</div>
+<div class="sidebar">
 
-<nav class="sidebar">
-{% set perms = session.get('permissions', '').split(',') %}
-<span class="user-info">
-        👤 {{ session['full_name'] }}
+    <div class="logo">
+        hamo store
+    </div>
+
+    <nav class="sidebar">
+
+    {% set role = session.get('role') %}
+    {% set perms = session.get('permissions', '').replace(' ', '').split(',') %}
+
+    <span class="user-info">
+        👤 {{ session.get('full_name','') }}
     </span>
-<a href="{{ url_for('dashboard') }}">🏠 الرئيسية</a>
 
-<a href="{{ url_for('services') }}">
-    🛒 الخدمات
-</a>
-{% if 'sales' in perms %}
-<a href="{{ url_for('sales') }}">💰 المبيعات</a>
-{% endif %}
+    <a href="{{ url_for('dashboard') }}">🏠 الرئيسية</a>
 
-{% if 'sales' in perms %}
-<a href="{{ url_for('purchases') }}">💰 المشتريات</a>
-{% endif %}
+    <!-- SERVICES -->
+    {% if role == 'admin' or 'services' in perms %}
+    <a href="{{ url_for('services') }}">🛒 الخدمات</a>
+    {% endif %}
 
+    <!-- SALES -->
+    {% if role == 'admin' or 'sales' in perms %}
+    <a href="{{ url_for('sales') }}">💰 المبيعات</a>
+    {% endif %}
 
+    <!-- PURCHASES -->
+    {% if role == 'admin' or 'purchases' in perms %}
+    <a href="{{ url_for('purchases') }}">💰 المشتريات</a>
+    {% endif %}
 
-{% if 'expenses' in perms %}
-<a href="{{ url_for('expenses') }}">💸 المصروفات</a>
-{% endif %}
+    <!-- EXPENSES -->
+    {% if role == 'admin' or 'expenses' in perms %}
+    <a href="{{ url_for('expenses') }}">💸 المصروفات</a>
+    {% endif %}
 
-{% if 'currencies' in perms %}
-<a href="{{ url_for('currencies') }}">💱 العملات</a>
-{% endif %}
-
-<a href="{{ url_for('customers') }}"
-   class="{% if request.endpoint == 'customers' %}active{% endif %}">
-   👤 العملاء
-</a>
-
-<a href="{{ url_for('accounts') }}"
-   class="{% if request.endpoint == 'accounts' %}active{% endif %}">
-   🏦 الحسابات
-</a>
-
-
-{% if 'employees' in perms %}
-<a href="{{ url_for('employees') }}">👥 الموظفين</a>
-{% endif %}
-
-{% if 'reports' in perms %}
-<a href="{{ url_for('reports') }}">📊 التقارير</a>
-{% endif %}
-<div class="topbar-left">
+    <!-- CURRENCIES -->
+    {% if role == 'admin' or 'currencies' in perms %}
+    <a href="{{ url_for('currencies') }}">💱 العملات</a>
+    {% endif %}
 
     
+    <!-- visa gafar -->
+    {% if role == 'admin' or 'visa_gafar' in perms %}
+    <a href="{{ url_for('visa_gafar') }}">💱 فيزا جعفر</a>
+    {% endif %}
 
-    <a href="/logout" class="logout-btn">
-        تسجيل الخروج
-    </a>
-
-</div>
-</nav>
-
-</div>
-<div class="content"><div class="topbar">
-
-    {% block titlebar %}
-    نظام إدارة المبيعات
-    {% endblock %}
-
-</div>
-
-
-<div class="page-content">
-
-    {% block content %}
     
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-    {% endblock %}
+    
+    
+    <!-- CUSTOMERS -->
+    {% if role == 'admin' or 'customers' in perms %}
+    <a href="{{ url_for('customers') }}">👤 العملاء</a>
+    {% endif %}
+
+    <!-- ACCOUNTS -->
+    {% if role == 'admin' or 'accounts' in perms %}
+    <a href="{{ url_for('accounts') }}">🏦 الحسابات</a>
+    {% endif %}
+
+    <!-- EMPLOYEES -->
+    {% if role == 'admin' or 'employees' in perms %}
+    <a href="{{ url_for('employees') }}">👥 الموظفين</a>
+    {% endif %}
+
+    <!-- REPORTS -->
+    {% if role == 'admin' or 'reports' in perms %}
+    <a href="{{ url_for('reports') }}">📊 التقارير</a>
+    {% endif %}
+
+    <div class="topbar-left">
+        <a href="/logout" class="logout-btn">تسجيل الخروج</a>
+    </div>
+
+    </nav>
 
 </div>
 
+<div class="content">
+
+    <div class="topbar">
+        {% block titlebar %}
+        نظام إدارة المبيعات
+        {% endblock %}
+    </div>
+
+    <div class="page-content">
+
+        {% block content %}
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% endblock %}
+
+    </div>
+
 </div>
+
 <script>
 setTimeout(function(){
     let msg = document.getElementById("flash-message");
@@ -116,4 +135,5 @@ setTimeout(function(){
 }, 3000);
 </script>
 
-</body></html>
+</body>
+</html>

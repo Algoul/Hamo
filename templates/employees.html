@@ -45,9 +45,16 @@
     <label><input type="checkbox" name="permissions" value="currencies"> العملات</label>
 
     <label><input type="checkbox" name="permissions" value="employees"> الموظفون</label>
+     
+    <label><input type="checkbox" name="permissions" value="customers">العملاء </label>
+     
+    <label><input type="checkbox" name="permissions" value="invoice"> الحسابات </label>
+
+    <label><input type="checkbox" name="permissions" value="purchases"> المشتريات </label>
 
     <label><input type="checkbox" name="permissions" value="expenses"> المصروفات</label>
 
+    
 </div>
 <select name="status"><option value="1">نشط</option>
 <option value="0">معطل</option></select></div></div><button class="btn-save" type="submit">
@@ -68,7 +75,7 @@
 
 <td>{{ user['username'] }}</td>
 
-<td>{{ user['role'] }}</td>
+<td>{{ user['perms'] }}</td>
 
 <td>
     {% if user['status'] == 1 %}

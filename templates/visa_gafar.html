@@ -1,0 +1,65 @@
+
+{% extends "base.html" %}
+
+{% block title %}Visa Gafar{% endblock %}
+
+{% block content %}
+
+<h2>💳 Visa Gafar</h2>
+
+<div>
+    <h3>إجمالي السعر: {{ total_amount }}</h3>
+    <h3>إجمالي الباقات: {{ total_packages }}</h3>
+</div>
+<div style="background:#eee;padding:10px;margin-bottom:10px;">
+    <h3>💰 رصيد الفيزا: {{ balance }}</h3>
+</div>
+
+<hr>
+
+<!-- إيداع -->
+<form method="POST" action="/visa_gafar/deposit">
+    <input type="number" name="amount" placeholder="إيداع">
+    <button>➕ إيداع</button>
+</form>
+
+<br>
+
+<!-- سحب -->
+<form method="POST" action="/visa_gafar/withdraw">
+    <input type="number" name="amount" placeholder="سحب">
+    <button>➖ سحب</button>
+</form>
+
+<hr>
+
+<table>
+    <tr>
+        <th>رقم العملية</th>
+        <th>الباقة</th>
+        <th>السعر</th>
+        <th>الموظف</th>
+        <th>إجراء</th>
+    </tr>
+
+    {% for sale in sales %}
+    <tr>
+        <td>{{ sale['transaction_number'] }}</td>
+        <td>{{ sale['package'] }}</td>
+        <td>{{ sale['local_amount'] }}</td>
+        <td>{{ sale['employee'] }}</td>
+
+        <td>
+            {% if session.get('role') == 'admin' %}
+            <a href="/visa_gafar/delete/{{ sale['id'] }}"
+               onclick="return confirm('حذف العملية؟')"
+               style="color:red;">
+               🗑 حذف
+            </a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
