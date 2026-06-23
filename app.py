@@ -7,24 +7,11 @@ app = Flask(__name__)
 app.secret_key = "hamo_store_secret"
 
 def get_db_connection():
-
-    database_url = os.environ.get("DATABASE_URL")
-
-    if database_url:
-        return psycopg2.connect(
-            database_url,
+    return psycopg2.connect(
+            os.environ.get("DATABASE_URL"),
             cursor_factory=RealDictCursor
         )
-
-    return psycopg2.connect(
-        host="localhost",
-        database="hamo_store",
-        user="postgres",
-        password="YOUR_PASSWORD",
-        cursor_factory=RealDictCursor
-    )
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods = ['GET', 'POST'])
 def login():
 
     error = None
