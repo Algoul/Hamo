@@ -1227,16 +1227,18 @@ def visa_gafar():
     SELECT COALESCE(
         SUM(
             CASE
-                WHEN LOWER(package) LIKE '%k'
-                THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
-                ELSE package::NUMERIC
+                WHEN package ~ '^[0-9]+k$'
+                THEN REPLACE(LOWER(package),'k','')::NUMERIC
+                ELSE 0
             END
         ),
     0) AS total
     FROM sales
     WHERE visa_type='Visa Gafar'
 """)
+
     total_packages = cursor.fetchone()['total']
+
     cursor.execute("""
         SELECT COALESCE(SUM(amount),0) AS total
         FROM visa_gafar
