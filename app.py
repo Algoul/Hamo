@@ -1228,7 +1228,7 @@ def visa_gafar():
         SUM(
             CASE
                 WHEN package ~ '^[0-9]+k$'
-                THEN REPLACE(LOWER(package),'k','')::NUMERIC
+                THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
                 ELSE 0
             END
         ),
