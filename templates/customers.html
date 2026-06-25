@@ -56,9 +56,9 @@
 <tr>
     <td>{{ customer['name'] }}</td>
     <td>{{ customer['phone'] }}</td>
-    <td>{{ customer['total_amount'] }}</td>
-    <td>{{ customer['paid_amount'] }}</td>
-    <td>{{ customer['remaining_amount'] }}</td>
+    <td>{{ customer['total_amount']|money }}</td>
+    <td>{{ customer['paid_amount']|money }}</td>
+    <td>{{ customer['remaining_amount']|money }}</td>
     <td>{{ customer['created_at'] }}</td>
     <td>
     <a href="/customers/payment/{{ customer['id'] }}"

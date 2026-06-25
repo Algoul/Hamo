@@ -65,7 +65,7 @@
         <p><b>الخدمة:</b> {{ sale['service'] }}</p>
         <p><b>الباقة:</b> {{ sale['package'] }}</p>
         <p><b>السعر:</b> {{ sale['price'] }}</p>
-        <p><b>القيمة المحلية:</b> {{ sale['local_amount'] }}</p>
+        <p><b>القيمة المحلية:</b> {{ sale['local_amount']|money }}</p>
         <p><b>الموظف:</b> {{ sale['employee'] }}</p>
         <p><b>التاريخ:</b> {{ sale['created_at'] }}</p>
     </div>

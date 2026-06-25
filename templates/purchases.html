@@ -61,8 +61,8 @@
 <tr>
     <td>{{ p['currency_name'] }}</td>
     <td>{{ p['quantity'] }}</td>
-    <td>{{ p['purchase_rate'] }}</td>
-    <td>{{ p['total_amount'] }}</td>
+    <td>{{ p['purchase_rate']|money }}</td>
+    <td>{{ p['total_amount']|money }}</td>
     <td>{{ p['supplier'] }}</td>
     <td>{{ p['created_at'] }}</td>
     <td>

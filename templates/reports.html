@@ -8,28 +8,28 @@
 
 <div class="stat-card">
     <h3>عمليات اليوم</h3>
-    <h2>{{ today_sales }}</h2>
+    <h2>{{ today_sales|money }}</h2>
 </div>
 
 <div class="stat-card">
     <h3>مبيعات اليوم</h3>
-    <h2>{{ today_amount }}</h2>
+    <h2>{{ today_amount|money }}</h2>
 </div>
 <div class="stat-card">
     <h3>إجمالي المصروفات</h3>
-    <h2>{{ expenses_total }}</h2>
+    <h2>{{ expenses_total|money }}</h2>
 </div>
 <div class="stat-card">
     <h3>مبيعات الشهر</h3>
-    <h2>{{ month_amount }}</h2>
+    <h2>{{ month_amount|money }}</h2>
 </div>
 <div class="stat-card">
     <h3>إجمالي المشتريات</h3>
-    <h2>{{ purchases_total }}</h2>
+    <h2>{{ purchases_total|money }}</h2>
 </div>
 <div class="stat-card">
     <h3>صافي الربح</h3>
-    <h2>{{ net_profit }}</h2>
+    <h2>{{ net_profit|money }}</h2>
 </div>
 <div class="report-tabs">
 
@@ -105,8 +105,8 @@
         <td>{{ sale['transaction_number'] }}</td>
         <td>{{ sale['service'] }}</td>
         <td>{{ sale['package'] }}</td>
-        <td>{{ sale['price'] }}</td>
-        <td>{{ sale['local_amount'] }}</td>
+        <td>{{ sale['price']|money }}</td>
+        <td>{{ sale['local_amount']|money }}</td>
         <td>{{ sale['employee'] }}</td>
         <td>{{ sale['created_at'] }}</td>
         <td>{{ sale['visa_type'] }}</td>
@@ -135,17 +135,17 @@
 
     <tr>
         <td>إجمالي المشتريات</td>
-        <td>{{ purchases_total }}</td>
+        <td>{{ purchases_total|money }}</td>
     </tr>
 
     <tr>
         <td>إجمالي المصروفات</td>
-        <td>{{ expenses_total }}</td>
+        <td>{{ expenses_total|money }}</td>
     </tr>
 
     <tr>
         <td><strong>صافي الربح</strong></td>
-        <td><strong>{{ net_profit }}</strong></td>
+        <td><strong>{{ net_profit|money }}</strong></td>
     </tr>
 </table>
 </div>
@@ -167,8 +167,8 @@
 
     <tr>
         <td>{{ e['employee'] }}</td>
-        <td>{{ e['total_sales'] }}</td>
-        <td>{{ e['total_amount'] }}</td>
+        <td>{{ e['total_sales']|money }}</td>
+        <td>{{ e['total_amount']|money }}</td>
     </tr>
 
     {% endfor %}
@@ -190,8 +190,8 @@
 
     <tr>
         <td>{{ s['service'] }}</td>
-        <td>{{ s['total_sales'] }}</td>
-        <td>{{ s['total_amount'] }}</td>
+        <td>{{ s['total_sales']|money }}</td>
+        <td>{{ s['total_amount']|money }}</td>
     </tr>
 
     {% endfor %}

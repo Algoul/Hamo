@@ -8,12 +8,12 @@
 
 <div class="stats-row"><div class="stat-card">
     <h3>عمليات اليوم</h3>
-    <h2>{{ today_sales }}</h2>
+    <h2>{{ today_sales|money }}</h2>
 </div>
 
 <div class="stat-card">
     <h3>مبيعات اليوم</h3>
-    <h2>{{ today_amount }}</h2>
+    <h2>{{ today_amount|money }}</h2>
 </div>
 
 <div class="stat-card">
@@ -140,7 +140,7 @@
 
 <td>{{ sale['package'] }}</td>
 
-<td>{{ sale['price'] }}</td>
+<td>{{ sale['price']|money }}</td>
 
 <td>{{ sale['employee'] }}</td>
 
