@@ -212,11 +212,8 @@ def sales():
     new_balance,
     transaction_number
     ))
-
-
-
-    if visa_type == "Visa Gafar":
-        cursor.execute("""
+        if visa_type == "Visa Gafar":
+         cursor.execute("""
                     INSERT INTO visa_gafar
                     (
                         transaction_type,
@@ -240,9 +237,9 @@ def sales():
                     sale_id
                 ))
 
-    conn.commit()
+         conn.commit()
 
-    flash("تم حفظ العملية بنجاح")
+         flash("تم حفظ العملية بنجاح")
     cursor.execute(
         "SELECT * FROM sales ORDER BY id DESC LIMIT 10"
     )
@@ -257,7 +254,7 @@ def sales():
         "SELECT * FROM services ORDER BY name"
     )
     services = cursor.fetchall()
-    cursor.execute(
+        cursor.execute(
     "SELECT * FROM accounts ORDER BY name"
     )
     accounts = cursor.fetchall()
