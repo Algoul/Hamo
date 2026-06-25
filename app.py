@@ -199,12 +199,32 @@ def sales():
     )
     services = cursor.fetchall()
 
+    
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM sales
+        WHERE DATE(created_at)=CURRENT_DATE
+    """)
+    today_sales = cursor.fetchone()['count']
+
+    cursor.execute("""
+        SELECT COALESCE(SUM(local_amount),0) AS total
+        FROM sales
+        WHERE DATE(created_at)=CURRENT_DATE
+    """)
+    today_amount = cursor.fetchone()['total']
+
     conn.close()
+
+
 
     return render_template(
         'sales.html',
         sales=sales_data,
         currencies=currencies,
+        today_sales=today_sales,
+        today_amount=today_amount
+
         services=services
     )
 
