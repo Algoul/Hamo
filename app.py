@@ -103,6 +103,8 @@ def sales():
 
         employee = session['username']
         currency_id = request.form['currency_id']
+        account_id = request.form['account_id']
+
 
         cursor.execute(
             "SELECT * FROM currencies WHERE id=%s",
@@ -135,6 +137,7 @@ def sales():
                     price,
                     visa_type,
                     currency_id,
+                    account_id,
                     exchange_rate,
                     local_amount,
                     phone,
@@ -144,7 +147,7 @@ def sales():
                 )
                 VALUES
                 (
-                    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW()
+                    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW()
                 )
                 RETURNING id
             """,
@@ -156,6 +159,7 @@ def sales():
                 price,
                 visa_type,
                 currency_id,
+                account_id,
                 exchange_rate,
                 local_amount,
                 phone,
@@ -163,15 +167,62 @@ def sales():
                 employee
             ))
             sale_id = cursor.fetchone()['id']
+            
+        cursor.execute(
+            "SELECT balance FROM accounts WHERE id=%s",
+            (account_id,)
+            )
 
-            if visa_type == "Visa Gafar":
-             cursor.execute("""
+        account = cursor.fetchone()
+
+        new_balance = float(account['balance']) + float(local_amount)
+
+        cursor.execute("""
+            UPDATE accounts
+            SET balance=%s
+            WHERE id=%s
+            """,
+           (
+           new_balance,
+           account_id
+           ))
+
+        cursor.execute("""
+    INSERT INTO account_transactions
+    (
+        account_id,
+        type,
+        amount,
+        balance_after,
+        notes
+    )
+    VALUES
+    (
+        %s,
+        %s,
+        %s,
+        %s,
+        %s
+    )
+    """,
+    (
+    account_id,
+    'sale',
+    local_amount,
+    new_balance,
+    transaction_number
+    ))
+
+
+
+    if visa_type == "Visa Gafar":
+        cursor.execute("""
                     INSERT INTO visa_gafar
                     (
                         transaction_type,
                         amount,
                         package,
-                        sale_id,
+                        sale_id, 
                         created_at
                     )
                     VALUES
@@ -189,9 +240,9 @@ def sales():
                     sale_id
                 ))
 
-        conn.commit()
+    conn.commit()
 
-        flash("تم حفظ العملية بنجاح")
+    flash("تم حفظ العملية بنجاح")
     cursor.execute(
         "SELECT * FROM sales ORDER BY id DESC LIMIT 10"
     )
@@ -206,7 +257,10 @@ def sales():
         "SELECT * FROM services ORDER BY name"
     )
     services = cursor.fetchall()
-
+    cursor.execute(
+    "SELECT * FROM accounts ORDER BY name"
+    )
+    accounts = cursor.fetchall()
     
     cursor.execute("""
         SELECT COUNT(*)
@@ -232,7 +286,8 @@ def sales():
         currencies=currencies,
         today_sales=today_sales,
         today_amount=today_amount,
-        services=services
+        services=services,
+        accounts=accounts
     )
 
 @app.route('/sales/delete/<int:id>')
