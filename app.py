@@ -223,8 +223,7 @@ def sales():
         sales=sales_data,
         currencies=currencies,
         today_sales=today_sales,
-        today_amount=today_amount
-
+        today_amount=today_amount,
         services=services
     )
 
