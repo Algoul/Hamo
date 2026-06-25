@@ -478,10 +478,33 @@ def set_base_currency(id):
 @app.route('/dashboard')
 def dashboard():
 
- if 'user_id' not in session:
-    return redirect('/')
+    if 'user_id' not in session:
+        return redirect('/')
 
- return render_template('dashboard.html')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM sales
+        WHERE DATE(created_at)=CURRENT_DATE
+    """)
+    today_sales = cursor.fetchone()['count']
+
+    cursor.execute("""
+        SELECT COALESCE(SUM(local_amount),0) AS total
+        FROM sales
+        WHERE DATE(created_at)=CURRENT_DATE
+    """)
+    today_amount = cursor.fetchone()['total']
+
+    conn.close()
+
+    return render_template(
+        'dashboard.html',
+        today_sales=today_sales,
+        today_amount=today_amount
+    )
 
 @app.route('/reports')
 def reports():
@@ -1229,7 +1252,10 @@ def visa_gafar():
             CASE
                 WHEN package ~ '^[0-9]+k$'
                 THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
-                ELSE 0
+                WHEN package ~ '^[0-9]+$'
+                THEN package::NUMERIC
+
+                   ELSE 0
             END
         ),
     0) AS total
