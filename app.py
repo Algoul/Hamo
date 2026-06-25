@@ -1,10 +1,18 @@
 from flask import Flask, render_template, request, session, redirect, flash
 import psycopg2
 import os
+from decimal import Decimal
 from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__)
 app.secret_key = "hamo_store_secret"
+
+@app.template_filter('money')
+def money(value):
+    try:
+        return "{:,.0f}".format(float(value))
+    except:
+        return value
 
 def get_db_connection():
     return psycopg2.connect(
@@ -1080,7 +1088,7 @@ def deposit(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    amount = float(request.form['amount'])
+    amount = Decimal(request.form['amount'])
 
     cursor.execute(
         "SELECT balance FROM accounts WHERE id=%s",
@@ -1138,7 +1146,7 @@ def withdraw(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    amount = float(request.form['amount'])
+    amount = Decimal(request.form['amount'])
 
     cursor.execute(
         "SELECT balance FROM accounts WHERE id=%s",
