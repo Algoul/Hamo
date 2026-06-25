@@ -8,11 +8,11 @@
 <h2>💳 Visa Gafar</h2>
 
 <div>
-    <h3>إجمالي السعر: {{ total_amount }}</h3>
-    <h3>إجمالي الباقات: {{ total_packages }}</h3>
+    <h3>إجمالي السعر: {{ total_amount|money }}</h3>
+    <h3>إجمالي الباقات: {{ total_packages|money }}</h3>
 </div>
 <div style="background:#eee;padding:10px;margin-bottom:10px;">
-    <h3>💰 رصيد الفيزا: {{ balance }}</h3>
+    <h3>💰 رصيد الفيزا: {{ balance|money }}</h3>
 </div>
 
 <hr>
