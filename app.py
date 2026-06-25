@@ -254,7 +254,7 @@ def sales():
         "SELECT * FROM services ORDER BY name"
     )
     services = cursor.fetchall()
-        cursor.execute(
+    cursor.execute(
     "SELECT * FROM accounts ORDER BY name"
     )
     accounts = cursor.fetchall()
