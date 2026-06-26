@@ -90,7 +90,10 @@ def sales():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-
+    cursor.execute("""
+ALTER TABLE account_transactions
+ADD COLUMN IF NOT EXISTS sale_id INTEGER;
+""")
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -113,10 +116,7 @@ def sales():
 
         exchange_rate = currency['rate']
         local_amount = float(price) * float(exchange_rate)
-        cursor.execute("""
-ALTER TABLE account_transactions
-ADD COLUMN IF NOT EXISTS sale_id INTEGER;
-""")
+    
         conn.commit()
         cursor.execute(
             "SELECT id FROM sales WHERE transaction_number=%s",
