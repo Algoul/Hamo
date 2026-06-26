@@ -1312,6 +1312,27 @@ def account_report(id):
         transactions=transactions
     )
 
+import re
+
+def package_to_number(value):
+    if value is None:
+        return 0
+
+    value = str(value).strip().lower()
+
+    if value.endswith("k"):
+        try:
+            return float(value[:-1]) * 1000
+        except:
+            return 0
+
+    try:
+        return float(value)
+    except:
+        return 0
+
+
+
 @app.route('/visa_gafar')
 def visa_gafar():
 
@@ -1327,6 +1348,32 @@ def visa_gafar():
         ORDER BY id DESC
     """)
     sales = cursor.fetchall()
+    wholesale_sales = []
+    retail_sales = []
+
+    wholesale_amount = 0
+    retail_amount = 0
+
+    wholesale_packages = 0
+    retail_packages = 0
+
+    for sale in sales:
+
+     qty = package_to_number(sale["package"])
+
+     if qty >= 5000:
+
+        wholesale_sales.append(sale)
+        wholesale_amount += sale["local_amount"]
+        wholesale_packages += qty
+
+     else:
+
+        retail_sales.append(sale)
+        retail_amount += sale["local_amount"]
+        retail_packages += qty
+
+
 
     cursor.execute("""
         SELECT COALESCE(SUM(local_amount),0) AS total
@@ -1372,13 +1419,31 @@ def visa_gafar():
 
     conn.close()
 
+    wholesale_count = len(wholesale_sales)
+    retail_count = len(retail_sales)
+ 
     return render_template(
-        "visa_gafar.html",
-        sales=sales,
-        total_amount=total_amount,
-        total_packages=total_packages,
-        balance=balance
-    )
+    "visa_gafar.html",
+
+    sales=sales,
+
+    wholesale_sales=wholesale_sales,
+    retail_sales=retail_sales,
+
+    wholesale_amount=wholesale_amount,
+    retail_amount=retail_amount,
+
+    wholesale_packages=wholesale_packages,
+    retail_packages=retail_packages,
+
+    wholesale_count=wholesale_count,
+    retail_count=retail_count,
+
+    total_amount=total_amount,
+    total_packages=total_packages,
+    balance=balance
+)
+
 
 @app.route('/visa_gafar/deposit', methods=['POST'])
 def visa_gafar_deposit():

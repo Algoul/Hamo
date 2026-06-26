@@ -33,33 +33,89 @@
 
 <hr>
 
+<h2>🟦 الجملة (5000 فأكثر)</h2>
+
 <table>
-    <tr>
-        <th>رقم العملية</th>
-        <th>الباقة</th>
-        <th>السعر</th>
-        <th>الموظف</th>
-        <th>إجراء</th>
-    </tr>
+<tr>
+    <th>رقم العملية</th>
+    <th>الباقة</th>
+    <th>السعر</th>
+    <th>الموظف</th>
+    <th>حذف</th>
+</tr>
 
-    {% for sale in sales %}
-    <tr>
-        <td>{{ sale['transaction_number'] }}</td>
-        <td>{{ sale['package'] }}</td>
-        <td>{{ sale['local_amount']|money }}</td>
-        <td>{{ sale['employee'] }}</td>
+{% for sale in wholesale_sales %}
+<tr>
+    <td>{{ sale['transaction_number'] }}</td>
+    <td>{{ sale['package'] }}</td>
+    <td>{{ sale['local_amount']|money }}</td>
+    <td>{{ sale['employee'] }}</td>
 
-        <td>
-            {% if session.get('role') == 'admin' %}
-            <a href="/visa_gafar/delete/{{ sale['id'] }}"
-               onclick="return confirm('حذف العملية؟')"
-               style="color:red;">
-               🗑 حذف
-            </a>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
+    <td>
+        {% if session.get('role') == 'admin' %}
+        <a href="/visa_gafar/delete/{{ sale['id'] }}"
+           onclick="return confirm('حذف العملية؟')"
+           style="color:red;">
+           🗑 حذف
+        </a>
+        {% endif %}
+    </td>
+
+</tr>
+{% endfor %}
+
+<tr style="background:#eee;font-weight:bold;">
+    <td colspan="2">الإجمالي</td>
+    <td>{{ wholesale_amount|money }}</td>
+    <td>{{ wholesale_packages|money }}</td>
+    <td>{{ wholesale_count }}</td>
+</tr>
+
+</table>
+
+
+<br><br>
+
+<h2>🟩 القطاعي (أقل من 5000)</h2>
+
+<table>
+
+<tr>
+    <th>رقم العملية</th>
+    <th>الباقة</th>
+    <th>السعر</th>
+    <th>الموظف</th>
+    <th>حذف</th>
+</tr>
+
+{% for sale in retail_sales %}
+<tr>
+
+    <td>{{ sale['transaction_number'] }}</td>
+    <td>{{ sale['package'] }}</td>
+    <td>{{ sale['local_amount']|money }}</td>
+    <td>{{ sale['employee'] }}</td>
+
+    <td>
+        {% if session.get('role') == 'admin' %}
+        <a href="/visa_gafar/delete/{{ sale['id'] }}"
+           onclick="return confirm('حذف العملية؟')"
+           style="color:red;">
+           🗑 حذف
+        </a>
+        {% endif %}
+    </td>
+
+</tr>
+{% endfor %}
+
+<tr style="background:#eee;font-weight:bold;">
+    <td colspan="2">الإجمالي</td>
+    <td>{{ retail_amount|money }}</td>
+    <td>{{ retail_packages|money }}</td>
+    <td>{{ retail_count }}</td>
+</tr>
+
 </table>
 
 {% endblock %}
