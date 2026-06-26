@@ -89,11 +89,7 @@ def sales():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        ALTER TABLE sales
-        ADD COLUMN IF NOT EXISTS account_id INTEGER
-    """)
-
+    
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -171,79 +167,71 @@ def sales():
                 employee
             ))
             sale_id = cursor.fetchone()['id']
-            
-        cursor.execute(
+            cursor.execute(
             "SELECT balance FROM accounts WHERE id=%s",
             (account_id,)
             )
 
-        account = cursor.fetchone()
+            account = cursor.fetchone()
 
-        new_balance = float(account['balance']) + float(local_amount)
+            new_balance = float(account['balance']) + float(local_amount)
 
-        cursor.execute("""
+            cursor.execute("""
             UPDATE accounts
             SET balance=%s
             WHERE id=%s
+            """, (new_balance, account_id))
+
+            cursor.execute("""
+            INSERT INTO account_transactions
+            (
+            account_id,
+            type,
+            amount,
+            balance_after,
+            notes
+            )
+            VALUES
+            (
+            %s,%s,%s,%s,%s
+            )
             """,
-           (
-           new_balance,
-           account_id
-           ))
+            (
+            account_id,
+            'sale',
+            local_amount,
+            new_balance,
+            transaction_number
+            ))
 
-        cursor.execute("""
-    INSERT INTO account_transactions
-    (
-        account_id,
-        type,
-        amount,
-        balance_after,
-        notes
-    )
-    VALUES
-    (
-        %s,
-        %s,
-        %s,
-        %s,
-        %s
-    )
-    """,
-    (
-    account_id,
-    'sale',
-    local_amount,
-    new_balance,
-    transaction_number
-    ))
-        if visa_type == "Visa Gafar":
-         cursor.execute("""
-                    INSERT INTO visa_gafar
-                    (
-                        transaction_type,
-                        amount,
-                        package,
-                        sale_id, 
-                        created_at
-                    )
-                    VALUES
-                    (
-                        'sale',
-                        %s,
-                        %s,
-                        %s,
-                        NOW()
-                    )
-                """,
-                (
-                    local_amount,
-                    package,
-                    sale_id
-                ))
+            if visa_type == "Visa Gafar":
+             cursor.execute("""
+             INSERT INTO visa_gafar
+             (
+             transaction_type,
+             amount,
+             package,
+             sale_id,
+             created_at
+             )
+             VALUES
+             (
+             'sale',
+             %s,
+             %s,
+             %s,
+             NOW()
+             )
+             """,
+             (
+             local_amount,
+             package,
+             sale_id
+             ))
 
-         conn.commit()
-
-         flash("تم حفظ العملية بنجاح")
+             conn.commit()
+             flash("تم حفظ العملية بنجاح")
+        
     cursor.execute(
         "SELECT * FROM sales ORDER BY id DESC LIMIT 10"
     )
