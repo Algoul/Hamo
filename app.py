@@ -83,12 +83,16 @@ def login():
     )
 @app.route('/sales', methods=['GET', 'POST'])
 def sales():
-
+    
     if 'user_id' not in session:
         return redirect('/')
 
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("""
+        ALTER TABLE sales
+        ADD COLUMN IF NOT EXISTS account_id INTEGER
+    """)
 
     if request.method == 'POST':
 
@@ -1430,20 +1434,6 @@ def visa_gafar_withdraw():
     conn.close()
 
     return redirect('/visa_gafar')
-
-@app.before_first_request
-def fix_db():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        ALTER TABLE sales
-        ADD COLUMN IF NOT EXISTS account_id INTEGER
-    """)
-
-    conn.commit()
-    conn.close()
-
 @app.route('/visa_gafar/delete/<int:id>')
 def delete_visa_sale(id):
 
