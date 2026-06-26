@@ -90,10 +90,6 @@ def sales():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-ALTER TABLE account_transactions
-ADD COLUMN IF NOT EXISTS sale_id INTEGER;
-""")
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -198,12 +194,12 @@ ADD COLUMN IF NOT EXISTS sale_id INTEGER;
                 type,
                 amount,
                 balance_after,
-                notes,
-                sale_id
+                notes
+                
             )
             VALUES
             (
-                %s,%s,%s,%s,%s,%s
+                %s,%s,%s,%s,%s
             )
             """,
             (
@@ -211,8 +207,7 @@ ADD COLUMN IF NOT EXISTS sale_id INTEGER;
                 'sale',
                 local_amount,
                 new_balance,
-                transaction_number,
-                sale_id
+                transaction_number
             ))
 
             if visa_type == "Visa Gafar":
@@ -238,7 +233,7 @@ ADD COLUMN IF NOT EXISTS sale_id INTEGER;
                 (
                     local_amount,
                     package,
-                    sale_id
+                    notes
                 ))
 
             conn.commit()
