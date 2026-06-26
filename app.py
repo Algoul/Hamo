@@ -113,7 +113,11 @@ def sales():
 
         exchange_rate = currency['rate']
         local_amount = float(price) * float(exchange_rate)
-
+        cursor.execute("""
+ALTER TABLE account_transactions
+ADD COLUMN IF NOT EXISTS sale_id INTEGER;
+""")
+        conn.commit()
         cursor.execute(
             "SELECT id FROM sales WHERE transaction_number=%s",
             (transaction_number,)
