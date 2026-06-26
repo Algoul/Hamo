@@ -170,6 +170,7 @@ ADD COLUMN IF NOT EXISTS account_id INTEGER
                 employee
             ))
             sale_id = cursor.fetchone()['id']
+            print("sale inserted:",sale_id)
             cursor.execute(
             "SELECT balance FROM accounts WHERE id=%s",
             (account_id,)
@@ -232,8 +233,9 @@ ADD COLUMN IF NOT EXISTS account_id INTEGER
              sale_id
              ))
 
-             conn.commit()
-             flash("تم حفظ العملية بنجاح")
+            conn.commit()
+            print("commit done")
+            flash("تم حفظ العملية بنجاح")
         
     cursor.execute(
         "SELECT * FROM sales ORDER BY id DESC LIMIT 10"
