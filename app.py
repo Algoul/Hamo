@@ -81,15 +81,16 @@ def login():
         "login.html",
         error=error
     )
+
 @app.route('/sales', methods=['GET', 'POST'])
 def sales():
-    
+
     if 'user_id' not in session:
         return redirect('/')
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    
+
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -104,8 +105,6 @@ def sales():
         employee = session['username']
         currency_id = request.form['currency_id']
         account_id = request.form['account_id']
-
-
         cursor.execute(
             "SELECT * FROM currencies WHERE id=%s",
             (currency_id,)
@@ -119,6 +118,7 @@ def sales():
             "SELECT id FROM sales WHERE transaction_number=%s",
             (transaction_number,)
         )
+
         exists = cursor.fetchone()
 
         if exists:
@@ -128,28 +128,28 @@ def sales():
         else:
 
             cursor.execute("""
-                INSERT INTO sales
-                (
-                    transaction_number,
-                    customer_name,
-                    service,
-                    package,
-                    price,
-                    visa_type,
-                    currency_id,
-                    account_id,
-                    exchange_rate,
-                    local_amount,
-                    phone,
-                    notes,
-                    employee,
-                    created_at
-                )
-                VALUES
-                (
-                    %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW()
-                )
-                RETURNING id
+            INSERT INTO sales
+            (
+                transaction_number,
+                customer_name,
+                service,
+                package,
+                price,
+                visa_type,
+                currency_id,
+                account_id,
+                exchange_rate,
+                local_amount,
+                phone,
+                notes,
+                employee,
+                created_at
+            )
+            VALUES
+            (
+                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW()
+            )
+            RETURNING id
             """,
             (
                 transaction_number,
@@ -167,73 +167,77 @@ def sales():
                 employee
             ))
             sale_id = cursor.fetchone()['id']
-            print("sale inserted:",sale_id)
             cursor.execute(
-            "SELECT balance FROM accounts WHERE id=%s",
-            (account_id,)
+                "SELECT balance FROM accounts WHERE id=%s",
+                (account_id,)
             )
 
             account = cursor.fetchone()
 
-            new_balance = float(account['balance']) + float(local_amount)
+            old_balance = float(account['balance'])
+            new_balance = old_balance + float(local_amount)
 
             cursor.execute("""
-            UPDATE accounts
-            SET balance=%s
-            WHERE id=%s
-            """, (new_balance, account_id))
+                UPDATE accounts
+                SET balance=%s
+                WHERE id=%s
+            """,
+            (
+                new_balance,
+                account_id
+            ))
 
             cursor.execute("""
             INSERT INTO account_transactions
             (
-            account_id,
-            type,
-            amount,
-            balance_after,
-            notes
+                account_id,
+                type,
+                amount,
+                balance_after,
+                notes
             )
             VALUES
             (
-            %s,%s,%s,%s,%s
+                %s,%s,%s,%s,%s
             )
             """,
             (
-            account_id,
-            'sale',
-            local_amount,
-            new_balance,
-            transaction_number
+                account_id,
+                'sale',
+                local_amount,
+                new_balance,
+                sale_id
             ))
 
             if visa_type == "Visa Gafar":
-             cursor.execute("""
-             INSERT INTO visa_gafar
-             (
-             transaction_type,
-             amount,
-             package,
-             sale_id,
-             created_at
-             )
-             VALUES
-             (
-             'sale',
-             %s,
-             %s,
-             %s,
-             NOW()
-             )
-             """,
-             (
-             local_amount,
-             package,
-             sale_id
-             ))
+
+                cursor.execute("""
+                INSERT INTO visa_gafar
+                (
+                    transaction_type,
+                    amount,
+                    package,
+                    sale_id,
+                    created_at
+                )
+                VALUES
+                (
+                    'sale',
+                    %s,
+                    %s,
+                    %s,
+                    NOW()
+                )
+                """,
+                (
+                    local_amount,
+                    package,
+                    sale_id
+                ))
 
             conn.commit()
-            print("commit done")
+
             flash("تم حفظ العملية بنجاح")
-        
     cursor.execute(
         "SELECT * FROM sales ORDER BY id DESC LIMIT 10"
     )
@@ -248,11 +252,12 @@ def sales():
         "SELECT * FROM services ORDER BY name"
     )
     services = cursor.fetchall()
+
     cursor.execute(
-    "SELECT * FROM accounts ORDER BY name"
+        "SELECT * FROM accounts ORDER BY name"
     )
     accounts = cursor.fetchall()
-    
+
     cursor.execute("""
         SELECT COUNT(*)
         FROM sales
@@ -266,36 +271,67 @@ def sales():
         WHERE DATE(created_at)=CURRENT_DATE
     """)
     today_amount = cursor.fetchone()['total']
-
     conn.close()
-
-
-
     return render_template(
         'sales.html',
         sales=sales_data,
         currencies=currencies,
-        today_sales=today_sales,
-        today_amount=today_amount,
         services=services,
-        accounts=accounts
+        accounts=accounts,
+        today_sales=today_sales,
+        today_amount=today_amount
     )
-
 @app.route('/sales/delete/<int:id>')
 def delete_sale(id):
 
- conn = get_db_connection()
- cursor = conn.cursor()
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
- cursor.execute(
-    "DELETE FROM sales WHERE id=%s",
-    (id,)
-)
+    # 1. جلب بيانات العملية قبل الحذف
+    cursor.execute("""
+        SELECT local_amount, account_id, visa_type
+        FROM sales
+        WHERE id=%s
+    """, (id,))
 
- conn.commit()
- conn.close()
+    sale = cursor.fetchone()
 
- return redirect('/sales')
+    if sale:
+
+        # 2. خصم المبلغ من الحساب
+        cursor.execute("""
+            UPDATE accounts
+            SET balance = balance - %s
+            WHERE id = %s
+        """, (
+            sale['local_amount'],
+            sale['account_id']
+        ))
+
+        # 3. حذف حركة الحساب
+        cursor.execute("""
+            DELETE FROM account_transactions
+            WHERE sale_id = %s
+        """, (id,))  # إذا غيرت notes لاحقاً لـ sale_id نعدله
+
+        # 4. حذف Visa Gafar إن وجدت
+        if sale['visa_type'] == "Visa Gafar":
+            cursor.execute("""
+                DELETE FROM visa_gafar
+                WHERE sale_id = %s
+            """, (id,))
+
+        # 5. حذف العملية نفسها
+        cursor.execute("""
+            DELETE FROM sales
+            WHERE id = %s
+        """, (id,))
+
+        conn.commit()
+
+    conn.close()
+
+    return redirect('/sales')
 
 @app.route('/services', methods=['GET', 'POST'])
 def services():
