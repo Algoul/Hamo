@@ -311,7 +311,7 @@ def delete_sale(id):
         # 3. حذف حركة الحساب
         cursor.execute("""
             DELETE FROM account_transactions
-            WHERE sale_id = %s
+            WHERE notes = %s
         """, (id,))  # إذا غيرت notes لاحقاً لـ sale_id نعدله
 
         # 4. حذف Visa Gafar إن وجدت
