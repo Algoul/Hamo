@@ -194,11 +194,12 @@ def sales():
                 type,
                 amount,
                 balance_after,
-                notes
+                notes,
+                sale_id
             )
             VALUES
             (
-                %s,%s,%s,%s,%s
+                %s,%s,%s,%s,%s,%s
             )
             """,
             (
@@ -206,6 +207,7 @@ def sales():
                 'sale',
                 local_amount,
                 new_balance,
+                transaction_number,
                 sale_id
             ))
 
@@ -311,7 +313,7 @@ def delete_sale(id):
         # 3. حذف حركة الحساب
         cursor.execute("""
             DELETE FROM account_transactions
-            WHERE notes = %s
+            WHERE sale_id = %s
         """, (id,))  # إذا غيرت notes لاحقاً لـ sale_id نعدله
 
         # 4. حذف Visa Gafar إن وجدت
