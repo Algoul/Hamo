@@ -90,6 +90,7 @@ def sales():
 
     conn = get_db_connection()
     cursor = conn.cursor()
+
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -104,6 +105,8 @@ def sales():
         employee = session['username']
         currency_id = request.form['currency_id']
         account_id = request.form['account_id']
+
+        # جلب العملة
         cursor.execute(
             "SELECT * FROM currencies WHERE id=%s",
             (currency_id,)
@@ -112,46 +115,42 @@ def sales():
 
         exchange_rate = currency['rate']
         local_amount = float(price) * float(exchange_rate)
-    
-        conn.commit()
+
+        # منع التكرار
         cursor.execute(
             "SELECT id FROM sales WHERE transaction_number=%s",
             (transaction_number,)
         )
-
         exists = cursor.fetchone()
 
         if exists:
-
             flash("رقم العملية موجود مسبقاً")
-
+        
         else:
 
+            # إدخال البيع
             cursor.execute("""
-            INSERT INTO sales
-            (
-                transaction_number,
-                customer_name,
-                service,
-                package,
-                price,
-                visa_type,
-                currency_id,
-                account_id,
-                exchange_rate,
-                local_amount,
-                phone,
-                notes,
-                employee,
-                created_at
-            )
-            VALUES
-            (
-                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW()
-            )
-            RETURNING id
-            """,
-            (
+                INSERT INTO sales
+                (
+                    transaction_number,
+                    customer_name,
+                    service,
+                    package,
+                    price,
+                    visa_type,
+                    currency_id,
+                    account_id,
+                    exchange_rate,
+                    local_amount,
+                    phone,
+                    notes,
+                    employee,
+                    created_at
+                )
+                VALUES
+                (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+                RETURNING id
+            """, (
                 transaction_number,
                 customer_name,
                 service,
@@ -166,113 +165,91 @@ def sales():
                 notes,
                 employee
             ))
+
             sale_id = cursor.fetchone()['id']
-            cursor.execute(
-                "SELECT balance FROM accounts WHERE id=%s",
-                (account_id,)
-            )
 
-            account = cursor.fetchone()
-
-            old_balance = float(account['balance'])
-            new_balance = old_balance + float(local_amount)
-
+            # تحديث الحساب
             cursor.execute("""
                 UPDATE accounts
-                SET balance=%s
-                WHERE id=%s
-            """,
-            (
-                new_balance,
+                SET balance = balance + %s
+                WHERE id = %s
+            """, (
+                local_amount,
                 account_id
             ))
 
+            # تسجيل الحركة
             cursor.execute("""
-            INSERT INTO account_transactions
-            (
-                account_id,
-                type,
-                amount,
-                balance_after,
-                notes
-                
-            )
-            VALUES
-            (
-                %s,%s,%s,%s,%s
-            )
-            """,
-            (
+                INSERT INTO account_transactions
+                (
+                    account_id,
+                    type,
+                    amount,
+                    balance_after,
+                    notes
+                )
+                VALUES (%s,%s,%s,
+                    (SELECT balance FROM accounts WHERE id=%s),
+                    %s)
+            """, (
                 account_id,
                 'sale',
                 local_amount,
-                new_balance,
+                account_id,
                 transaction_number
             ))
 
+            # Visa Gafar
             if visa_type == "Visa Gafar":
-
                 cursor.execute("""
-                INSERT INTO visa_gafar
-                (
-                    transaction_type,
-                    amount,
-                    package,
-                    sale_id,
-                    created_at
-                )
-                VALUES
-                (
-                    'sale',
-                    %s,
-                    %s,
-                    %s,
-                    NOW()
-                )
-                """,
-                (
+                    INSERT INTO visa_gafar
+                    (
+                        transaction_type,
+                        amount,
+                        package,
+                        sale_id,
+                        created_at
+                    )
+                    VALUES
+                    ('sale',%s,%s,%s,NOW())
+                """, (
                     local_amount,
                     package,
-                    notes
+                    sale_id
                 ))
 
             conn.commit()
-
             flash("تم حفظ العملية بنجاح")
-    cursor.execute(
-        "SELECT * FROM sales ORDER BY id DESC LIMIT 10"
-    )
+
+            return redirect('/sales')
+
+    cursor.execute("SELECT * FROM sales ORDER BY id DESC LIMIT 10")
     sales_data = cursor.fetchall()
 
-    cursor.execute(
-        "SELECT * FROM currencies ORDER BY name"
-    )
+    cursor.execute("SELECT * FROM currencies ORDER BY name")
     currencies = cursor.fetchall()
 
-    cursor.execute(
-        "SELECT * FROM services ORDER BY name"
-    )
+    cursor.execute("SELECT * FROM services ORDER BY name")
     services = cursor.fetchall()
 
-    cursor.execute(
-        "SELECT * FROM accounts ORDER BY name"
-    )
+    cursor.execute("SELECT * FROM accounts ORDER BY name")
     accounts = cursor.fetchall()
 
     cursor.execute("""
-        SELECT COUNT(*)
-        FROM sales
+        SELECT COUNT(*) FROM sales
         WHERE DATE(created_at)=CURRENT_DATE
     """)
     today_sales = cursor.fetchone()['count']
 
     cursor.execute("""
-        SELECT COALESCE(SUM(local_amount),0) AS total
+        SELECT COALESCE(SUM(local_amount),0)
         FROM sales
         WHERE DATE(created_at)=CURRENT_DATE
     """)
-    today_amount = cursor.fetchone()['total']
+    today_amount = cursor.fetchone()['coalesce']
+
     conn.close()
+
     return render_template(
         'sales.html',
         sales=sales_data,
@@ -282,15 +259,16 @@ def sales():
         today_sales=today_sales,
         today_amount=today_amount
     )
+
 @app.route('/sales/delete/<int:id>')
 def delete_sale(id):
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 1. جلب بيانات العملية قبل الحذف
+    # جلب العملية
     cursor.execute("""
-        SELECT local_amount, account_id, visa_type
+        SELECT local_amount, account_id, visa_type, transaction_number
         FROM sales
         WHERE id=%s
     """, (id,))
@@ -299,7 +277,7 @@ def delete_sale(id):
 
     if sale:
 
-        # 2. خصم المبلغ من الحساب
+        # خصم من الحساب
         cursor.execute("""
             UPDATE accounts
             SET balance = balance - %s
@@ -309,20 +287,22 @@ def delete_sale(id):
             sale['account_id']
         ))
 
-        # 3. حذف حركة الحساب
+        # حذف حركة الحساب باستخدام transaction_number
         cursor.execute("""
             DELETE FROM account_transactions
-            WHERE sale_id = %s
-        """, (id,))  # إذا غيرت notes لاحقاً لـ sale_id نعدله
+            WHERE notes = %s
+        """, (
+            sale['transaction_number'],
+        ))
 
-        # 4. حذف Visa Gafar إن وجدت
+        # حذف Visa Gafar إذا موجود
         if sale['visa_type'] == "Visa Gafar":
             cursor.execute("""
                 DELETE FROM visa_gafar
                 WHERE sale_id = %s
             """, (id,))
 
-        # 5. حذف العملية نفسها
+        # حذف البيع
         cursor.execute("""
             DELETE FROM sales
             WHERE id = %s
@@ -333,7 +313,6 @@ def delete_sale(id):
     conn.close()
 
     return redirect('/sales')
-
 @app.route('/services', methods=['GET', 'POST'])
 def services():
 
