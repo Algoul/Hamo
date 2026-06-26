@@ -89,7 +89,10 @@ def sales():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    
+    cursor.execute("""
+ALTER TABLE sales
+ADD COLUMN IF NOT EXISTS account_id INTEGER
+""")
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
