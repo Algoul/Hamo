@@ -313,6 +313,33 @@ def delete_sale(id):
     conn.close()
 
     return redirect('/sales')
+@app.route('/debug/sales')
+def debug_sales():
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM sales
+    """)
+    count = cursor.fetchone()['total']
+
+    cursor.execute("""
+        SELECT MIN(created_at) AS first_date,
+               MAX(created_at) AS last_date
+        FROM sales
+    """)
+    dates = cursor.fetchone()
+
+    conn.close()
+
+    return {
+        "total_sales": count,
+        "first_date": str(dates['first_date']),
+        "last_date": str(dates['last_date'])
+    }
+
 @app.route('/services', methods=['GET', 'POST'])
 def services():
 
