@@ -92,13 +92,10 @@ def sales():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    
     page = request.args.get('page', 1, type=int)
-
     per_page = 50
-
     offset = (page - 1) * per_page
-
+    
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -694,6 +691,9 @@ def reports():
 
  conn = get_db_connection()
  cursor = conn.cursor()
+ page = request.args.get('page', 1, type=int)
+ per_page = 50
+ offset = (page - 1) * per_page
 
  from_date = request.args.get('from_date')
  to_date = request.args.get('to_date')
@@ -713,10 +713,7 @@ WHERE 1=1
  if from_date and to_date:
     query += " AND DATE(created_at) BETWEEN %s AND %s"
     params.extend([from_date, to_date])
-    page = request.args.get('page', 1, type=int)
-    per_page = 50
-    offset = (page - 1) * per_page
-
+    
  cursor.execute(
     query + " ORDER BY id DESC LIMIT %s OFFSET %s",
     params + [per_page, offset]
