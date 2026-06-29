@@ -124,7 +124,7 @@
 
 </form>
 
-<div class="table-card"><h2>آخر العمليات</h2><table><tr>
+<div class="table-card"><h2> العمليات</h2><table><tr>
     <th>رقم العملية</th>
     <th>الخدمة</th>
     <th>الباقة</th>
@@ -163,5 +163,27 @@
 
 </tr>{% endfor %}
 
-</table></div>
+</table>
+<div style="text-align:center;margin-top:20px;">
+
+{% if page > 1 %}
+<a class="btn-save"
+   href="{{ url_for('sales', page=page-1) }}">
+⬅ السابق
+</a>
+{% endif %}
+
+<span style="margin:0 20px;font-weight:bold;">
+صفحة {{ page }} من {{ total_pages }}
+</span>
+
+{% if page < total_pages %}
+<a class="btn-save"
+   href="{{ url_for('sales', page=page+1) }}">
+التالي ➡
+</a>
+{% endif %}
+
+</div>
+</div>
 {% endblock %}

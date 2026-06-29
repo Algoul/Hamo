@@ -223,8 +223,32 @@ def sales():
 
             return redirect('/sales')
 
-    cursor.execute("SELECT * FROM sales ORDER BY id DESC LIMIT 10")
+    page = request.args.get('page', 1, type=int)
+
+    per_page = 50
+
+    offset = (page - 1) * per_page
+
+    cursor.execute("""
+    SELECT *
+    FROM sales
+    ORDER BY id DESC
+    LIMIT %s OFFSET %s
+""", (
+    per_page,
+    offset
+))
+
     sales_data = cursor.fetchall()
+
+    cursor.execute("""
+    SELECT COUNT(*) AS total
+    FROM sales
+""")
+
+    total = cursor.fetchone()['total']
+
+    total_pages = (total + per_page - 1) // per_page
 
     cursor.execute("SELECT * FROM currencies ORDER BY name")
     currencies = cursor.fetchall()
@@ -257,7 +281,10 @@ def sales():
         services=services,
         accounts=accounts,
         today_sales=today_sales,
-        today_amount=today_amount
+        today_amount=today_amount,
+        page=page,
+        total_pages=total_pages
+
     )
 
 @app.route('/sales/delete/<int:id>')
