@@ -34,15 +34,23 @@
         <th>الخدمة</th>
         <th>المبلغ</th>
         <th>الموظف</th>
+        <th>نوع الفيزا</th>
+         <th>الملاحظات</th>
+          <th>الباقة</th>
         <th>التاريخ</th>
+
     </tr>
 
     {% for s in sales %}
     <tr>
         <td>{{ s.transaction_number }}</td>
         <td>{{ s.service }}</td>
+        
         <td>{{ s.local_amount }}</td>
         <td>{{ s.employee }}</td>
+        <td>{{ s.visa_type }}</td>
+        <td>{{ s.notes }}</td>
+        <td>{{ s.package }}</td>
         <td>{{ s.created_at }}</td>
     </tr>
     {% endfor %}

@@ -146,6 +146,7 @@
         <th>القيمة المحلية</th>
         <th>الموظف</th>
         <th>التاريخ</th>
+        <th>ملاحظات</th>
         <th>نوع الفيزا</th>
         
     </tr>
@@ -160,6 +161,7 @@
         <td>{{ sale['local_amount']|money }}</td>
         <td>{{ sale['employee'] }}</td>
         <td>{{ sale['created_at'] }}</td>
+        <td>{{ sale['notes'] }}</td>
         <td>{{ sale['visa_type'] }}</td>
     </tr>
 
