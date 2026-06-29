@@ -259,19 +259,49 @@ def sales():
     cursor.execute("SELECT * FROM accounts ORDER BY name")
     accounts = cursor.fetchall()
 
+
+    # 📅 مبيعات اليوم
     cursor.execute("""
-        SELECT COUNT(*) FROM sales
-        WHERE DATE(created_at)=CURRENT_DATE
-    """)
+    SELECT COUNT(*) FROM sales
+    WHERE DATE(created_at)=CURRENT_DATE
+""")
     today_sales = cursor.fetchone()['count']
 
     cursor.execute("""
-        SELECT COALESCE(SUM(local_amount),0)
-        FROM sales
-        WHERE DATE(created_at)=CURRENT_DATE
-    """)
+    SELECT COALESCE(SUM(local_amount),0)
+    FROM sales
+    WHERE DATE(created_at)=CURRENT_DATE
+""")
     today_amount = cursor.fetchone()['coalesce']
 
+# 💸 مصروفات اليوم
+    cursor.execute("""
+    SELECT COALESCE(SUM(amount),0)
+    FROM expenses
+    WHERE DATE(created_at)=CURRENT_DATE
+""")
+    today_expenses = cursor.fetchone()['coalesce']
+
+# 🛒 مشتريات اليوم
+    cursor.execute("""
+    SELECT COALESCE(SUM(total_amount),0)
+    FROM purchases
+    WHERE DATE(created_at)=CURRENT_DATE
+""")
+    today_purchases = cursor.fetchone()['coalesce']
+
+# 💰 صافي ربح اليوم
+    today_profit = float(today_amount or 0) - float(today_expenses or 0) - float(today_purchases or 0)
+
+# 📄 آخر عمليات اليوم
+    cursor.execute("""
+    SELECT *
+    FROM sales
+    WHERE DATE(created_at)=CURRENT_DATE
+    ORDER BY id DESC
+    LIMIT 10
+""")
+    today_last_sales = cursor.fetchall()
     conn.close()
 
     return render_template(
@@ -282,6 +312,10 @@ def sales():
         accounts=accounts,
         today_sales=today_sales,
         today_amount=today_amount,
+        today_expenses=today_expenses,
+        today_purchases=today_purchases,
+        today_profit=today_profit,
+        today_last_sales=today_last_sales,
         page=page,
         total_pages=total_pages
 
@@ -676,12 +710,22 @@ WHERE 1=1
  if from_date and to_date:
     query += " AND DATE(created_at) BETWEEN %s AND %s"
     params.extend([from_date, to_date])
+    page = request.args.get('page', 1, type=int)
+    per_page = 50
+    offset = (page - 1) * per_page
 
  cursor.execute(
-    query + " ORDER BY id DESC LIMIT 100",
-    params
+    query + " ORDER BY id DESC LIMIT %s OFFSET %s",
+    params + [per_page, offset]
 )
  last_sales = cursor.fetchall()
+
+ cursor.execute(
+    "SELECT COUNT(*) FROM sales"
+)
+ total = cursor.fetchone()['count']
+
+ total_pages = (total + per_page - 1) // per_page
 
  cursor.execute("""
     SELECT COUNT(*)
@@ -753,6 +797,8 @@ WHERE 1=1
  return render_template(
     "reports.html",
     last_sales=last_sales,
+    page=page,
+    total_pages=total_pages,
     today_sales=today_sales,
     today_amount=today_amount,
     month_amount=month_amount,

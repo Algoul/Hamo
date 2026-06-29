@@ -82,6 +82,57 @@
     </button>
 
 </form>
+<h2>📅 التقرير اليومي</h2>
+
+<div class="stats-row">
+
+    <div class="stat-card">
+        📊 عمليات اليوم
+        <h2>{{ today_sales }}</h2>
+    </div>
+
+    <div class="stat-card">
+        💰 مبيعات اليوم
+        <h2>{{ today_amount|money }}</h2>
+    </div>
+
+    <div class="stat-card">
+        💸 مصروفات اليوم
+        <h2>{{ today_expenses|money }}</h2>
+    </div>
+
+    <div class="stat-card">
+        🛒 مشتريات اليوم
+        <h2>{{ today_purchases|money }}</h2>
+    </div>
+
+    <div class="stat-card">
+        📈 صافي ربح اليوم
+        <h2>{{ today_profit|money }}</h2>
+    </div>
+
+</div>
+<h3>📄 آخر عمليات اليوم</h3>
+
+<table>
+<tr>
+    <th>رقم العملية</th>
+    <th>الخدمة</th>
+    <th>المبلغ</th>
+    <th>الموظف</th>
+</tr>
+
+{% for s in today_last_sales %}
+<tr>
+    <td>{{ s.transaction_number }}</td>
+    <td>{{ s.service }}</td>
+    <td>{{ s.local_amount|money }}</td>
+    <td>{{ s.employee }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
 <div id="sales-report" class="report-section">
 <h2>العمليات</h2>
 
@@ -197,6 +248,23 @@
     {% endfor %}
 
 </table>
+<div style="text-align:center;margin-top:20px;">
+
+{% if page > 1 %}
+<a href="/reports?page={{ page-1 }}">⬅ السابق</a>
+{% endif %}
+
+<span style="margin:0 15px;">
+الصفحة {{ page }} من {{ total_pages }}
+</span>
+
+{% if page < total_pages %}
+<a href="/reports?page={{ page+1 }}">التالي ➡</a>
+{% endif %}
+
+</div>
+
+
 </div>
 
 <script>
