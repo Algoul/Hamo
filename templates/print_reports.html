@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>طباعة التقارير</title>
+
+    <style>
+        body { font-family: Arial; direction: rtl; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 5px; }
+        h2 { text-align: center; }
+
+        @media print {
+            button { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>📊 تقرير المبيعات الكامل</h2>
+
+<div>
+    <h3>💰 إجمالي المبيعات: {{ total_sales }}</h3>
+    <h3>💸 المصروفات: {{ expenses }}</h3>
+    <h3>🛒 المشتريات: {{ purchases }}</h3>
+    <h3>📈 صافي الربح: {{ net_profit }}</h3>
+</div>
+
+<hr>
+
+<table>
+    <tr>
+        <th>رقم العملية</th>
+        <th>الخدمة</th>
+        <th>المبلغ</th>
+        <th>الموظف</th>
+        <th>التاريخ</th>
+    </tr>
+
+    {% for s in sales %}
+    <tr>
+        <td>{{ s.transaction_number }}</td>
+        <td>{{ s.service }}</td>
+        <td>{{ s.local_amount }}</td>
+        <td>{{ s.employee }}</td>
+        <td>{{ s.created_at }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+<br>
+
+<button onclick="window.print()">🖨️ طباعة</button>
+
+</body>
+</html>

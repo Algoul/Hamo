@@ -95,7 +95,7 @@ def sales():
     page = request.args.get('page', 1, type=int)
     per_page = 50
     offset = (page - 1) * per_page
-    
+
     if request.method == 'POST':
 
         transaction_number = request.form['transaction_number']
@@ -1381,7 +1381,57 @@ def delete_account(id):
 
     return redirect('/accounts')
 
+@app.route('/reports/print')
+def print_reports():
 
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 📄 جلب كل المبيعات بدون LIMIT
+    cursor.execute("""
+        SELECT *
+        FROM sales
+        ORDER BY id ASC
+    """)
+    sales = cursor.fetchall()
+
+    # 📊 إجمالي المبيعات
+    cursor.execute("""
+        SELECT COALESCE(SUM(local_amount),0)
+        FROM sales
+    """)
+    total_sales = cursor.fetchone()['coalesce']
+
+    # 💸 المصروفات
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount),0)
+        FROM expenses
+    """)
+    expenses = cursor.fetchone()['coalesce']
+
+    # 🛒 المشتريات
+    cursor.execute("""
+        SELECT COALESCE(SUM(total_amount),0)
+        FROM purchases
+    """)
+    purchases = cursor.fetchone()['coalesce']
+
+    # 💰 صافي الربح
+    net_profit = float(total_sales or 0) - float(expenses or 0) - float(purchases or 0)
+
+    conn.close()
+
+    return render_template(
+        "print_reports.html",
+        sales=sales,
+        total_sales=total_sales,
+        expenses=expenses,
+        purchases=purchases,
+        net_profit=net_profit
+    )
 @app.route('/accounts/report/<int:id>')
 def account_report(id):
 
