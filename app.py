@@ -88,6 +88,12 @@ def sales():
     if 'user_id' not in session:
         return redirect('/')
 
+    page = request.args.get('page', 1, type=int)
+
+    per_page = 50
+
+    offset = (page - 1) * per_page
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -223,12 +229,7 @@ def sales():
 
             return redirect('/sales')
 
-    page = request.args.get('page', 1, type=int)
-
-    per_page = 50
-
-    offset = (page - 1) * per_page
-
+    
     cursor.execute("""
     SELECT *
     FROM sales
