@@ -1497,12 +1497,12 @@ def visa_gafar():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-          cursor.execute("""
+        cursor.execute("""
         ALTER TABLE visa_gafar
         ADD COLUMN cycle INTEGER DEFAULT 1
     """)
-        except:
-         pass
+    except:
+        pass
 
 
     # 🔥 جلب آخر دورة
