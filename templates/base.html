@@ -93,7 +93,7 @@
     <div class="topbar-left">
         <a href="/logout" class="logout-btn">تسجيل الخروج</a>
     </div>
-    {% if role == 'admin' or 'reports' in perms %}
+    {% if role == 'admin' or 'settings' in perms %}
     <a href="{{ url_for('settings') }}">📊 bauk up</a>
     {% endif %}
 

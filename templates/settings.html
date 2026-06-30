@@ -1,3 +1,22 @@
 <a class="btn-save" href="/backup/create">
     💾 إنشاء نسخة احتياطية
 </a>
+<div class="setting-card">
+
+    <h3>📤 استعادة نسخة احتياطية</h3>
+
+    <p>رفع ملف النسخة (ZIP)</p>
+
+    <form action="/backup/restore" method="POST" enctype="multipart/form-data">
+
+        <input type="file" name="file" required>
+
+        <br><br>
+
+        <button class="btn-save" type="submit">
+            رفع واستعادة
+        </button>
+
+    </form>
+
+</div>

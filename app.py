@@ -1760,6 +1760,76 @@ def create_backup():
         as_attachment=True,
         download_name=zip_name
     )
+@app.route('/backup/restore', methods=['POST'])
+def restore_backup():
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    file = request.files['file']
+
+    if not file:
+        flash("لم يتم اختيار ملف")
+        return redirect('/settings')
+
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "backup.zip")
+
+    file.save(zip_path)
+
+    extract_dir = os.path.join(temp_dir, "extract")
+    os.makedirs(extract_dir, exist_ok=True)
+
+    # فك الضغط
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # قراءة كل CSV وإرجاع البيانات
+    for file_name in os.listdir(extract_dir):
+
+        if file_name.endswith(".csv"):
+
+            table_name = file_name.replace(".csv", "")
+            file_path = os.path.join(extract_dir, file_name)
+
+            with open(file_path, "r", encoding="utf-8") as f:
+
+                reader = csv.DictReader(f)
+
+                # 🧨 حذف البيانات القديمة
+                cursor.execute(f"DELETE FROM {table_name}")
+
+                for row in reader:
+
+                    columns = list(row.keys())
+                    values = list(row.values())
+
+                    placeholders = ",".join(["%s"] * len(values))
+                    cols = ",".join(columns)
+
+                    cursor.execute(
+                        f"INSERT INTO {table_name} ({cols}) VALUES ({placeholders})",
+                        values
+                    )
+
+    conn.commit()
+    conn.close()
+
+    flash("تم استعادة النسخة الاحتياطية بنجاح")
+
+    return redirect('/settings')
+
+@app.route('/settings')
+def settings():
+
+    if 'user_id' not in session:
+        return redirect('/')
+
+    return render_template("settings.html")
+
 @app.route('/logout')
 def logout():
 
