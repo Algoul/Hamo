@@ -1,6 +1,11 @@
-from flask import Flask, render_template, request, session, redirect, flash
+from flask import Flask, render_template, request, session, redirect, flash, send_file
 import psycopg2
 import os
+import csv
+import json
+import zipfile
+import tempfile
+from datetime import datetime
 from decimal import Decimal
 from psycopg2.extras import RealDictCursor
 
@@ -1677,7 +1682,84 @@ def delete_visa_sale(id):
 
     return redirect('/visa_gafar')
 
+@app.route('/backup/create')
+def create_backup():
 
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 🔥 جلب كل الجداول تلقائياً
+    cursor.execute("""
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname='public'
+    """)
+
+    tables = [row['tablename'] for row in cursor.fetchall()]
+
+    # 📁 مجلد مؤقت
+    temp_dir = tempfile.mkdtemp()
+
+    # 📦 تصدير كل جدول CSV
+    for table in tables:
+
+        try:
+            cursor.execute(f"SELECT * FROM {table}")
+            rows = cursor.fetchall()
+
+            file_path = os.path.join(temp_dir, f"{table}.csv")
+
+            with open(file_path, "w", newline="", encoding="utf-8") as f:
+
+                writer = csv.writer(f)
+
+                if rows:
+                    writer.writerow(rows[0].keys())
+
+                    for row in rows:
+                        writer.writerow(row.values())
+
+        except Exception as e:
+            print(f"Skip table {table}: {e}")
+
+    # 📄 معلومات النسخة
+    backup_info = {
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "tables_count": len(tables),
+        "system": "Flask Sales System"
+    }
+
+    info_path = os.path.join(temp_dir, "backup_info.json")
+
+    with open(info_path, "w", encoding="utf-8") as f:
+        json.dump(backup_info, f, ensure_ascii=False, indent=4)
+
+    # 📦 إنشاء ملف ZIP
+    zip_name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    zip_path = os.path.join(temp_dir, zip_name)
+
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+
+        for file in os.listdir(temp_dir):
+
+            if file.endswith(".csv") or file.endswith(".json"):
+
+                zipf.write(
+                    os.path.join(temp_dir, file),
+                    arcname=file
+                )
+
+    conn.close()
+
+    # 📥 تنزيل النسخة مباشرة
+    return send_file(
+        zip_path,
+        as_attachment=True,
+        download_name=zip_name
+    )
 @app.route('/logout')
 def logout():
 
