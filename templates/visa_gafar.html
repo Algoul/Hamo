@@ -10,10 +10,19 @@
 <div>
     <h3>إجمالي السعر: {{ total_amount|money }}</h3>
     <h3>إجمالي الباقات: {{ total_packages|money }}</h3>
+    <h3>إجمالي الجملة: {{ wholesale_amount|money }}</h3>
+     <h3>إجمالي القطاعي: {{ retail_amount|money }}</h3>
 </div>
+
 <div style="background:#eee;padding:10px;margin-bottom:10px;">
     <h3>💰 رصيد الفيزا: {{ balance|money }}</h3>
 </div>
+<div style="margin:10px 0;">
+    <a href="/visa_gafar/cycles" class="btn-save">
+        📊 تقارير جميع الدورات
+    </a>
+</div>
+
 
 <hr>
 

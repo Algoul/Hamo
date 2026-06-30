@@ -24,6 +24,7 @@ def get_db_connection():
             os.environ.get("DATABASE_URL"),
             cursor_factory=RealDictCursor
         )
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
 
@@ -36,6 +37,15 @@ def login():
 
         conn = get_db_connection()
         cursor = conn.cursor()
+        
+        try:
+          cursor.execute("""
+        ALTER TABLE visa_gafar
+        ADD COLUMN cycle INTEGER DEFAULT 1
+    """)
+        except:
+         pass
+
 
         cursor.execute(
             "SELECT * FROM users WHERE username=%s AND password=%s",
@@ -1496,13 +1506,26 @@ def visa_gafar():
 
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    # 🔥 جلب آخر دورة
+    cursor.execute("""
+        SELECT COALESCE(MAX(cycle),1) AS cycle
+        FROM visa_gafar
+    """)
+    current_cycle = cursor.fetchone()['cycle']
+
+    # 🔥 المبيعات حسب الدورة
     cursor.execute("""
         SELECT *
         FROM sales
         WHERE visa_type = 'Visa Gafar'
+        AND visa_cycle = %s
         ORDER BY id DESC
-    """)
+    """, (current_cycle,))
+
     sales = cursor.fetchall()
+
+    # 🔥 تصنيف الجملة والقطاعي
     wholesale_sales = []
     retail_sales = []
 
@@ -1514,90 +1537,87 @@ def visa_gafar():
 
     for sale in sales:
 
-     qty = package_to_number(sale["package"])
+        qty = package_to_number(sale["package"])
 
-     if qty >= 5000:
+        if qty >= 5000:
 
-        wholesale_sales.append(sale)
-        wholesale_amount += sale["local_amount"]
-        wholesale_packages += qty
+            wholesale_sales.append(sale)
+            wholesale_amount += sale["local_amount"]
+            wholesale_packages += qty
 
-     else:
+        else:
 
-        retail_sales.append(sale)
-        retail_amount += sale["local_amount"]
-        retail_packages += qty
+            retail_sales.append(sale)
+            retail_amount += sale["local_amount"]
+            retail_packages += qty
 
-
-
+    # 🔥 إجمالي المبيعات (الدورة الحالية فقط)
     cursor.execute("""
         SELECT COALESCE(SUM(local_amount),0) AS total
         FROM sales
         WHERE visa_type='Visa Gafar'
-    """)
+        AND visa_cycle = %s
+    """, (current_cycle,))
+
     total_amount = cursor.fetchone()['total']
 
+    # 🔥 إجمالي الباقات
     cursor.execute("""
-    SELECT COALESCE(
-        SUM(
-            CASE
-                WHEN package ~ '^[0-9]+k$'
-                THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
-                WHEN package ~ '^[0-9]+$'
-                THEN package::NUMERIC
-
-                   ELSE 0
-            END
-        ),
-    0) AS total
-    FROM sales
-    WHERE visa_type='Visa Gafar'
-""")
+        SELECT COALESCE(
+            SUM(
+                CASE
+                    WHEN package ~ '^[0-9]+k$'
+                    THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
+                    WHEN package ~ '^[0-9]+$'
+                    THEN package::NUMERIC
+                    ELSE 0
+                END
+            ),0) AS total
+        FROM sales
+        WHERE visa_type='Visa Gafar'
+        AND visa_cycle = %s
+    """, (current_cycle,))
 
     total_packages = cursor.fetchone()['total']
 
+    # 🔥 الإيداع والسحب (الدورة الحالية)
     cursor.execute("""
         SELECT COALESCE(SUM(amount),0) AS total
         FROM visa_gafar
         WHERE transaction_type='deposit'
-    """)
+        AND cycle = %s
+    """, (current_cycle,))
+
     total_deposit = cursor.fetchone()['total']
 
     cursor.execute("""
         SELECT COALESCE(SUM(amount),0) AS total
         FROM visa_gafar
         WHERE transaction_type='withdraw'
-    """)
+        AND cycle = %s
+    """, (current_cycle,))
+
     total_withdraw = cursor.fetchone()['total']
 
     balance = total_deposit - total_withdraw - total_amount
 
     conn.close()
 
-    wholesale_count = len(wholesale_sales)
-    retail_count = len(retail_sales)
- 
     return render_template(
-    "visa_gafar.html",
+        "visa_gafar.html",
+        sales=sales,
+        wholesale_sales=wholesale_sales,
+        retail_sales=retail_sales,
+        wholesale_amount=wholesale_amount,
+        retail_amount=retail_amount,
+        wholesale_packages=wholesale_packages,
+        retail_packages=retail_packages,
+        total_amount=total_amount,
+        total_packages=total_packages,
+        balance=balance,
+        current_cycle=current_cycle
+    )
 
-    sales=sales,
-
-    wholesale_sales=wholesale_sales,
-    retail_sales=retail_sales,
-
-    wholesale_amount=wholesale_amount,
-    retail_amount=retail_amount,
-
-    wholesale_packages=wholesale_packages,
-    retail_packages=retail_packages,
-
-    wholesale_count=wholesale_count,
-    retail_count=retail_count,
-
-    total_amount=total_amount,
-    total_packages=total_packages,
-    balance=balance
-)
 
 
 @app.route('/visa_gafar/deposit', methods=['POST'])
@@ -1608,22 +1628,19 @@ def visa_gafar_deposit():
 
     amount = float(request.form['amount'])
 
+    # 🔥 جلب الدورة الحالية
     cursor.execute("""
-    INSERT INTO visa_gafar
-    (
-        transaction_type,
-        amount,
-        created_at
-    )
-    VALUES
-    (
-        'deposit',
-        %s,
-        NOW()
-    )
-    """,
-    (amount,)
-    )
+        SELECT COALESCE(MAX(cycle),1) AS cycle
+        FROM visa_gafar
+    """)
+    current_cycle = cursor.fetchone()['cycle']
+
+    # إدخال الإيداع
+    cursor.execute("""
+        INSERT INTO visa_gafar
+        (transaction_type, amount, cycle, created_at)
+        VALUES (%s,%s,%s,NOW())
+    """, ('deposit', amount, current_cycle))
 
     conn.commit()
     conn.close()
@@ -1640,26 +1657,24 @@ def visa_gafar_withdraw():
     amount = float(request.form['amount'])
 
     cursor.execute("""
-    INSERT INTO visa_gafar
-    (
-        transaction_type,
-        amount,
-        created_at
-    )
-    VALUES
-    (
-        'withdraw',
-        %s,
-        NOW()
-    )
-    """,
-    (amount,)
-    )
+        SELECT COALESCE(MAX(cycle),1) AS cycle
+        FROM visa_gafar
+    """)
+    current_cycle = cursor.fetchone()['cycle']
+
+    cursor.execute("""
+        INSERT INTO visa_gafar
+        (transaction_type, amount, cycle, created_at)
+        VALUES (%s,%s,%s,NOW())
+    """, ('withdraw', amount, current_cycle))
 
     conn.commit()
     conn.close()
 
     return redirect('/visa_gafar')
+
+
+
 @app.route('/visa_gafar/delete/<int:id>')
 def delete_visa_sale(id):
 
@@ -1681,7 +1696,70 @@ def delete_visa_sale(id):
     conn.close()
 
     return redirect('/visa_gafar')
+@app.route('/visa_gafar/cycles')
+def visa_cycles():
 
+    if 'user_id' not in session:
+        return redirect('/')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 🔥 جلب كل الدورات الموجودة
+    cursor.execute("""
+        SELECT DISTINCT cycle
+        FROM visa_gafar
+        ORDER BY cycle DESC
+    """)
+
+    cycles = cursor.fetchall()
+
+    all_cycles_data = []
+
+    for c in cycles:
+
+        cycle = c['cycle']
+
+        # 🔥 إجمالي المبيعات
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount),0) AS total
+            FROM visa_gafar
+            WHERE cycle=%s AND transaction_type='sale'
+        """, (cycle,))
+
+        sales_total = cursor.fetchone()['total']
+
+        # 🔥 الإيداع
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount),0) AS total
+            FROM visa_gafar
+            WHERE cycle=%s AND transaction_type='deposit'
+        """, (cycle,))
+
+        deposit = cursor.fetchone()['total']
+
+        # 🔥 السحب
+        cursor.execute("""
+            SELECT COALESCE(SUM(amount),0) AS total
+            FROM visa_gafar
+            WHERE cycle=%s AND transaction_type='withdraw'
+        """, (cycle,))
+
+        withdraw = cursor.fetchone()['total']
+
+        balance = deposit - withdraw - sales_total
+
+        all_cycles_data.append({
+            "cycle": cycle,
+            "sales": sales_total,
+            "deposit": deposit,
+            "withdraw": withdraw,
+            "balance": balance
+        })
+
+    conn.close()
+
+    return render_template("visa_cycles.html", cycles=all_cycles_data)
 @app.route('/backup/create')
 def create_backup():
 

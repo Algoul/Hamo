@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}تقارير الدورات{% endblock %}
+
+{% block content %}
+
+<h2>📊 تقارير Visa Gafar - جميع الدورات</h2>
+
+<table>
+    <tr>
+        <th>الدورة</th>
+        <th>إجمالي المبيعات</th>
+        <th>الإيداع</th>
+        <th>السحب</th>
+        <th>الرصيد</th>
+    </tr>
+
+    {% for c in cycles %}
+
+    <tr>
+        <td>{{ c.cycle }}</td>
+        <td>{{ c.sales|money }}</td>
+        <td>{{ c.deposit|money }}</td>
+        <td>{{ c.withdraw|money }}</td>
+        <td>{{ c.balance|money }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}
+
