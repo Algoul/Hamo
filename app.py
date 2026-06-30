@@ -903,7 +903,7 @@ def customer_payment(id):
 
  if request.method == 'POST':
 
-    payment = float(request.form['payment'])
+    payment = Decimal(request.form['payment'])
 
     new_paid = customer['paid_amount'] + payment
 
