@@ -151,6 +151,12 @@ def sales():
 
         exchange_rate = currency['rate']
         local_amount = float(price) * float(exchange_rate)
+        # جلب الدورة الحالية لفيزا جعفر
+        cursor.execute("""
+         SELECT COALESCE(MAX(cycle),1) AS cycle
+         FROM visa_gafar
+          """)
+        current_cycle = cursor.fetchone()['cycle']
 
         # منع التكرار
         cursor.execute(
@@ -181,10 +187,11 @@ def sales():
                     phone,
                     notes,
                     employee,
+                    visa_cycle,    
                     created_at
                 )
                 VALUES
-                (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+                (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
                 RETURNING id
             """, (
                 transaction_number,
@@ -199,7 +206,8 @@ def sales():
                 local_amount,
                 phone,
                 notes,
-                employee
+                employee,
+                current_cycle
             ))
 
             sale_id = cursor.fetchone()['id']
@@ -1646,14 +1654,43 @@ def visa_gafar_deposit():
 
     amount = float(request.form['amount'])
 
-    # 🔥 جلب الدورة الحالية
+    # جلب آخر دورة
     cursor.execute("""
         SELECT COALESCE(MAX(cycle),1) AS cycle
         FROM visa_gafar
     """)
     current_cycle = cursor.fetchone()['cycle']
 
-    # إدخال الإيداع
+    # حساب رصيد الدورة الحالية
+    cursor.execute("""
+        SELECT
+        COALESCE(
+            (SELECT SUM(amount)
+             FROM visa_gafar
+             WHERE transaction_type='deposit'
+             AND cycle=%s),0)
+        -
+        COALESCE(
+            (SELECT SUM(amount)
+             FROM visa_gafar
+             WHERE transaction_type='withdraw'
+             AND cycle=%s),0)
+        -
+        COALESCE(
+            (SELECT SUM(local_amount)
+             FROM sales
+             WHERE visa_type='Visa Gafar'
+             AND visa_cycle=%s),0)
+        AS balance
+    """, (current_cycle, current_cycle, current_cycle))
+
+    balance = float(cursor.fetchone()['balance'])
+
+    # إذا انتهت الدورة نبدأ دورة جديدة
+    if balance == 0:
+        current_cycle += 1
+
+    # تسجيل الإيداع
     cursor.execute("""
         INSERT INTO visa_gafar
         (transaction_type, amount, cycle, created_at)
