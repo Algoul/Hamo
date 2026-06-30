@@ -37,16 +37,6 @@ def login():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        try:
-          cursor.execute("""
-        ALTER TABLE visa_gafar
-        ADD COLUMN cycle INTEGER DEFAULT 1
-    """)
-        except:
-         pass
-
-
         cursor.execute(
             "SELECT * FROM users WHERE username=%s AND password=%s",
             (username, password)
@@ -1506,6 +1496,14 @@ def visa_gafar():
 
     conn = get_db_connection()
     cursor = conn.cursor()
+    try:
+          cursor.execute("""
+        ALTER TABLE visa_gafar
+        ADD COLUMN cycle INTEGER DEFAULT 1
+    """)
+        except:
+         pass
+
 
     # 🔥 جلب آخر دورة
     cursor.execute("""
