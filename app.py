@@ -238,7 +238,7 @@ def sales():
             """, (
                 account_id,
                 'sale',
-                local_amount,
+                price,
                 account_id,
                 transaction_number
             ))
