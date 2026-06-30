@@ -24,6 +24,32 @@ def get_db_connection():
             os.environ.get("DATABASE_URL"),
             cursor_factory=RealDictCursor
         )
+def migrate_database():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            ALTER TABLE sales
+            ADD COLUMN IF NOT EXISTS visa_cycle INTEGER DEFAULT 1
+        """)
+    except Exception as e:
+        print(e)
+
+    try:
+        cursor.execute("""
+            ALTER TABLE visa_gafar
+            ADD COLUMN IF NOT EXISTS cycle INTEGER DEFAULT 1
+        """)
+    except Exception as e:
+        print(e)
+
+    conn.commit()
+    conn.close()
+
+
+migrate_database()
+
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -1511,6 +1537,7 @@ def visa_gafar():
         SELECT *
         FROM sales
         WHERE visa_type = 'Visa Gafar'
+        AND visa_cycle = %s
         ORDER BY id DESC
     """, (current_cycle,))
 
