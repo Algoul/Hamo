@@ -218,7 +218,7 @@ def sales():
                 SET balance = balance + %s
                 WHERE id = %s
             """, (
-                local_amount,
+                price,
                 account_id
             ))
 

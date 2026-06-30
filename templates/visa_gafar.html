@@ -10,8 +10,8 @@
 <div>
     <h3>إجمالي السعر: {{ total_amount|money }}</h3>
     <h3>إجمالي الباقات: {{ total_packages|money }}</h3>
-    <h3>إجمالي الجملة: {{ wholesale_amount|money }}</h3>
-     <h3>إجمالي القطاعي: {{ retail_amount|money }}</h3>
+    <h3>إجمالي الجملة: {{ wholesale_packages|money }}</h3>
+     <h3>إجمالي القطاعي: {{ retail_packages|money }}</h3>
 </div>
 
 <div style="background:#eee;padding:10px;margin-bottom:10px;">
@@ -72,10 +72,8 @@
 
 </tr>
 {% endfor %}
-
 <tr style="background:#eee;font-weight:bold;">
-<td></td>
-    <td >الإجمالي</td>
+    <td>الإجمالي</td>
     <td>{{ wholesale_packages|money }}</td>
     <td>{{ wholesale_amount|money }}</td>
 </tr>
@@ -119,7 +117,7 @@
 {% endfor %}
 
 <tr style="background:#eee;font-weight:bold;">
-    <td >الإجمالي</td>
+    <td>الإجمالي</td>
     <td>{{ retail_packages|money }}</td>
     <td>{{ retail_amount|money }}</td>
 </tr>
