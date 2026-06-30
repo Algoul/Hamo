@@ -31,9 +31,18 @@ CREATE TABLE IF NOT EXISTS sales (
     notes TEXT,
     employee TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-""")
 
+               try:
+        cursor.execute("""
+        ALTER TABLE visa_gafar
+        ADD COLUMN cycle INTEGER DEFAULT 1
+    """)
+    except:
+        pass
+    )
+               
+""")
+    
 # ======================
 # CURRENCIES TABLE
 # ======================

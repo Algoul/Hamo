@@ -1496,14 +1496,7 @@ def visa_gafar():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    try:
-        cursor.execute("""
-        ALTER TABLE visa_gafar
-        ADD COLUMN cycle INTEGER DEFAULT 1
-    """)
-    except:
-        pass
-    conn.commit()
+
 
 
     # 🔥 جلب آخر دورة
@@ -1518,7 +1511,6 @@ def visa_gafar():
         SELECT *
         FROM sales
         WHERE visa_type = 'Visa Gafar'
-        AND visa_cycle = %s
         ORDER BY id DESC
     """, (current_cycle,))
 
