@@ -1503,6 +1503,7 @@ def visa_gafar():
     """)
     except:
         pass
+    conn.commit()
 
 
     # 🔥 جلب آخر دورة
