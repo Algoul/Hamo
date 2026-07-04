@@ -791,14 +791,14 @@ WHERE 1=1
  cursor.execute("""
     SELECT COALESCE(SUM(amount),0) AS total
     FROM expenses
-    WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT+DATE,'YYYY-MM')
+    WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT_DATE,'YYYY-MM')
 """)
  expenses_total = cursor.fetchone()['total']
 
  cursor.execute("""
     SELECT COALESCE(SUM(total_amount),0) AS total
     FROM purchases
-    WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT+DATE,'YYYY-MM')
+    WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT_DATE,'YYYY-MM')
 """)
  purchases_total = cursor.fetchone()['total']
 
@@ -1455,7 +1455,7 @@ def print_reports():
     cursor.execute("""
         SELECT COALESCE(SUM(amount),0) AS total 
         FROM expenses
-        WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT+DATE,'YYYY-MM')
+        WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT_DATE,'YYYY-MM')
     """)
     expenses_total = cursor.fetchone()['total']
     
