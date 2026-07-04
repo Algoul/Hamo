@@ -368,7 +368,7 @@ def delete_sale(id):
 
     # جلب العملية
     cursor.execute("""
-        SELECT local_amount, account_id, visa_type, transaction_number
+        SELECT price, account_id, visa_type, transaction_number
         FROM sales
         WHERE id=%s
     """, (id,))
@@ -383,7 +383,7 @@ def delete_sale(id):
             SET balance = balance - %s
             WHERE id = %s
         """, (
-            sale['local_amount'],
+            sale['price'],
             sale['account_id']
         ))
 
@@ -791,12 +791,14 @@ WHERE 1=1
  cursor.execute("""
     SELECT COALESCE(SUM(amount),0) AS total
     FROM expenses
+    WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT+DATE,'YYYY-MM')
 """)
  expenses_total = cursor.fetchone()['total']
 
  cursor.execute("""
     SELECT COALESCE(SUM(total_amount),0) AS total
     FROM purchases
+    WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT+DATE,'YYYY-MM')
 """)
  purchases_total = cursor.fetchone()['total']
 
@@ -1144,13 +1146,12 @@ def expenses():
     """)
 
     expenses_list = cursor.fetchall()
-
     conn.close()
 
     return render_template(
         "expenses.html",
         expenses=expenses_list
-    )
+                )
 
 
 @app.route('/invoice/<int:id>')
@@ -1446,11 +1447,18 @@ def print_reports():
 
     # 💸 المصروفات
     cursor.execute("""
-        SELECT COALESCE(SUM(amount),0)
+        SELECT COALESCE(SUM(amount),0) 
         FROM expenses
     """)
     expenses = cursor.fetchone()['coalesce']
-
+    # 💸 المصروفات
+    cursor.execute("""
+        SELECT COALESCE(SUM(amount),0) AS total 
+        FROM expenses
+        WHERE TO_CHAR(created_at,'YYYY-MM') = TO_CHAR(CURRENT+DATE,'YYYY-MM')
+    """)
+    expenses_total = cursor.fetchone()['total']
+    
     # 🛒 المشتريات
     cursor.execute("""
         SELECT COALESCE(SUM(total_amount),0)
@@ -1466,6 +1474,7 @@ def print_reports():
     return render_template(
         "print_reports.html",
         sales=sales,
+        expenses_total=expenses_total,
         total_sales=total_sales,
         expenses=expenses,
         purchases=purchases,
