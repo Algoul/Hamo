@@ -261,7 +261,8 @@ def sales():
                     package,
                     sale_id
                 ))
-
+            
+    
             conn.commit()
             flash("تم حفظ العملية بنجاح")
 
@@ -341,6 +342,27 @@ def sales():
     LIMIT 10
 """)
     today_last_sales = cursor.fetchall()
+    
+    cursor.execute("""
+SELECT COALESCE(
+    SUM(
+        CASE
+            WHEN package ~ '^[0-9]+k$'
+            THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
+            WHEN package ~ '^[0-9]+$'
+            THEN package::NUMERIC
+            ELSE 0
+        END
+    ),
+0) AS total
+FROM sales
+WHERE DATE(created_at)=CURRENT_DATE
+""")
+
+    today_packages = cursor.fetchone()['total']
+
+
+    
     conn.close()
 
     return render_template(
@@ -356,6 +378,7 @@ def sales():
         today_profit=today_profit,
         today_last_sales=today_last_sales,
         page=page,
+        today_packages =today_packages,
         total_pages=total_pages
 
     )
@@ -832,7 +855,28 @@ WHERE 1=1
     ORDER BY total_amount DESC
 """)
  service_report = cursor.fetchall()
+ cursor.execute("""
+SELECT COALESCE(
+    SUM(
+        CASE
+            WHEN package ~ '^[0-9]+k$'
+            THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
+            WHEN package ~ '^[0-9]+$'
+            THEN package::NUMERIC
+            ELSE 0
+        END
+    ),
+0) AS total
+FROM sales
+WHERE TO_CHAR(created_at,'YYYY-MM')
+      = TO_CHAR(CURRENT_DATE,'YYYY-MM')
+""")
 
+ month_packages = cursor.fetchone()['total']
+
+
+
+    
  conn.close()
 
  return render_template(
@@ -848,6 +892,7 @@ WHERE 1=1
     net_profit=net_profit,
     expenses=expenses,
     employees_report=employees_report,
+    month_packages=month_packages,
     service_report=service_report
 )
 
@@ -1468,7 +1513,27 @@ def print_reports():
 
     # 💰 صافي الربح
     net_profit = float(total_sales or 0) - float(expenses or 0) - float(purchases or 0)
+    cursor.execute("""
+SELECT COALESCE(
+    SUM(
+        CASE
+            WHEN package ~ '^[0-9]+k$'
+            THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
+            WHEN package ~ '^[0-9]+$'
+            THEN package::NUMERIC
+            ELSE 0
+        END
+    ),
+0) AS total
+FROM sales
+WHERE TO_CHAR(created_at,'YYYY-MM')
+      = TO_CHAR(CURRENT_DATE,'YYYY-MM')
+""")
 
+    month_packages = cursor.fetchone()['total']
+
+
+    
     conn.close()
 
     return render_template(
@@ -1478,6 +1543,7 @@ def print_reports():
         total_sales=total_sales,
         expenses=expenses,
         purchases=purchases,
+        month_packages=month_packages,
         net_profit=net_profit
     )
 @app.route('/accounts/report/<int:id>')

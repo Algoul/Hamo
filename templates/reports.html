@@ -23,6 +23,12 @@
     <h3>مبيعات الشهر</h3>
     <h2>{{ month_amount|money }}</h2>
 </div>
+
+<div class="card">
+    <h5>إجمالي كميات الشهر</h5>
+    <h2>{{ "{:,.0f}".format(month_packages) }}</h2>
+</div>
+
 <div class="stat-card">
     <h3>إجمالي المشتريات</h3>
     <h2>{{ purchases_total|money }}</h2>

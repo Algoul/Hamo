@@ -12,9 +12,16 @@
 </div>
 
 <div class="stat-card">
-    <h3>مبيعات اليوم</h3>
-    <h2>{{ today_amount|money }}</h2>
+    <h3>إجمالي كميات اليوم</h3>
+    <h2>{{ "{:,.0f}".format(today_packages) }}</h2>
 </div>
+
+<div class="stats-row"><div class="stat-card">
+    <h3>عمليات اليوم</h3>
+    <h2>{{ today_sales|money }}</h2>
+</div>
+
+
 
 <div class="stat-card">
     <h3>المستخدم الحالي</h3>
@@ -147,7 +154,7 @@
 <td>{{ sale['employee'] }}</td>
 
 <td>{{ sale['visa_type'] }}</td>
-<td>{{ sale['note'] }}</td>
+<td>{{ sale['notes'] }}</td>
 <td>
     <a href="/invoice/{{ sale['id'] }}" target="_blank">
         عرض
