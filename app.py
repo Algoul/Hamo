@@ -128,7 +128,8 @@ def sales():
     offset = (page - 1) * per_page
 
     if request.method == 'POST':
-
+        timezone = request.form.get("timezone", "UTC")
+        print("User Time Zone:", timezone)
         transaction_number = request.form['transaction_number']
         customer_name = request.form.get('customer_name', '')
         service = request.form['service']

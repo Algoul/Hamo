@@ -137,6 +137,9 @@ setTimeout(function(){
     }
 }, 3000);
 </script>
-
+<script>
+window.userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+console.log("Time Zone:", window.userTimeZone);
+</script>
 </body>
 </html>
