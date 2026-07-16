@@ -356,7 +356,7 @@ SELECT COALESCE(
     ),
 0) AS total
 FROM sales
-WHERE DATE(created_at)=CURRENT_DATE
+WHERE DATE(created_at)=CURRENT_DATE AND service ='A TIKIOK COINS'
 """)
 
     today_packages = cursor.fetchone()['total']
