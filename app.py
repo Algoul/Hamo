@@ -271,14 +271,15 @@ def sales():
 
     
     cursor.execute("""
-    SELECT *
-    FROM sales
-    ORDER BY id DESC
-    LIMIT %s OFFSET %s
-""", (
-    per_page,
-    offset
-))
+SELECT
+    sales.*,
+    accounts.name AS account
+FROM sales
+LEFT JOIN accounts
+ON sales.account_id = accounts.id
+ORDER BY sales.id DESC
+LIMIT %s OFFSET %s
+""", (per_page, offset))
 
     sales_data = cursor.fetchall()
 
