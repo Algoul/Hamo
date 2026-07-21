@@ -2016,7 +2016,10 @@ def restore_backup():
 
                     columns = list(row.keys())
                     values = list(row.values())
-
+                    values = [
+                        None if v == "" else v 
+                        for v in values
+                    ]
                     placeholders = ",".join(["%s"] * len(values))
                     cols = ",".join(columns)
 

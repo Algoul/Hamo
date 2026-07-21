@@ -139,7 +139,9 @@
     <th>السعر</th>
     <th>الموظف</th>
     <th>نوع الفيزا</th>
-   <th>الملاحظات</th>
+  <th> العملة</th>
+  <th>الحساب</th>
+    <th>الملاحظات</th>
     <th>فاتورة</th>
     <th>إجراء</th>
 </tr>{% for sale in sales %}
@@ -155,6 +157,8 @@
 <td>{{ sale['employee'] }}</td>
 
 <td>{{ sale['visa_type'] }}</td>
+<td>{{ sale['currencies'] }}</td>
+<td>{{ sale['accounts'] }}</td>
 <td>{{ sale['notes'] }}</td>
 <td>
     <a href="/invoice/{{ sale['id'] }}" target="_blank">
