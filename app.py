@@ -78,7 +78,7 @@ def login():
             session['username'] = user['username']
             session['full_name'] = user['full_name']
             session['role'] = user['role']
-            session['permissions'] = user['permissions']
+            session['permissions'] = user['permissions'] or ""
 
             conn = get_db_connection()
             cursor = conn.cursor()

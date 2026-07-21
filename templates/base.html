@@ -28,7 +28,7 @@
     <nav class="sidebar">
 
     {% set role = session.get('role') %}
-    {% set perms = session.get('permissions', '').replace(' ', '').split(',') %}
+    {% set perms = (session.get('permissions') or '').replace(' ', '').split(',') %}
 
     <span class="user-info">
         👤 {{ session.get('full_name','') }}
