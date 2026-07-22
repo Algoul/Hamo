@@ -273,10 +273,13 @@ def sales():
     cursor.execute("""
 SELECT
     sales.*,
-    accounts.name AS account
+    accounts.name AS account,
+    currencies.name AS currency
 FROM sales
 LEFT JOIN accounts
-ON sales.account_id = accounts.id
+    ON sales.account_id = accounts.id
+LEFT JOIN currencies
+    ON sales.currency_id = currencies.id
 ORDER BY sales.id DESC
 LIMIT %s OFFSET %s
 """, (per_page, offset))
