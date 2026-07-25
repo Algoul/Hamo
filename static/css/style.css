@@ -34,6 +34,17 @@ text-decoration:none;
 transition:.2s;
 }
 
+.sidebar.hide{
+    transform: translateX(100%);
+}
+
+.menu-btn{
+    background:none;
+    border:none;
+    font-size:28px;
+    cursor:pointer;
+    margin-left:10px;
+}
 .sidebar a:hover{
 background:#1e40af;
 color:white;

@@ -103,12 +103,17 @@
 
 <div class="content">
 
-    <div class="topbar">
+<div class="topbar">
+
+    <button id="menu-toggle" class="menu-btn">☰</button>
+
+    <span>
         {% block titlebar %}
         نظام إدارة المبيعات
         {% endblock %}
-    </div>
+    </span>
 
+</div>
     <div class="page-content">
 
         {% block content %}
@@ -141,5 +146,26 @@ setTimeout(function(){
 window.userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 console.log("Time Zone:", window.userTimeZone);
 </script>
+<script>
+const sidebar = document.querySelector(".sidebar");
+const btn = document.getElementById("menu-toggle");
+
+if (window.innerWidth <= 768) {
+    sidebar.classList.add("hide");
+}
+
+btn.addEventListener("click", function () {
+    sidebar.classList.toggle("hide");
+});
+
+document.querySelectorAll(".sidebar a").forEach(link => {
+    link.addEventListener("click", function () {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add("hide");
+        }
+    });
+});
+</script>
+
 </body>
 </html>
