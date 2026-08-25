@@ -9,6 +9,7 @@ from datetime import datetime
 from decimal import Decimal
 from psycopg2.extras import RealDictCursor
 
+
 app = Flask(__name__)
 app.secret_key = "hamo_store_secret"
 
