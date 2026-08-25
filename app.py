@@ -348,28 +348,32 @@ LIMIT %s OFFSET %s
     LIMIT 10
 """)
     today_last_sales = cursor.fetchall()
-    
+
     cursor.execute("""
-SELECT COALESCE(
-    SUM(
-        CASE
-            WHEN package ~ '^[0-9]+k$'
-            THEN REPLACE(LOWER(package),'k','')::NUMERIC * 1000
-            WHEN package ~ '^[0-9]+$'
-            THEN package::NUMERIC
-            ELSE 0
-        END
-    ),
-0) AS total
-FROM sales
-WHERE DATE(created_at)=CURRENT_DATE 
-AND service='A TIKTOK COINS'
+    SELECT
+        SUM(
+            CASE
+                WHEN LOWER(package) ~ '^[0-9]+k$'
+                    THEN REPLACE(LOWER(package), 'k', '')::NUMERIC * 1000
+                WHEN package ~ '^[0-9]+$'
+                    THEN package::NUMERIC
+                ELSE 0
+            END
+        ) AS total
+    FROM sales
+    WHERE DATE(created_at) = CURRENT_DATE
+      AND service = 'A TIKTOK COINS'
 """)
 
     result = cursor.fetchone()
     today_packages = result['total'] or 0
 
     print("TODAY PACKAGES =", today_packages)
+
+
+
+
+    
 
 
     
