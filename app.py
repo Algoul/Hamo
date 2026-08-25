@@ -367,9 +367,9 @@ AND service='A TIKTOK COINS'
 """)
 
     result = cursor.fetchone()
-today_packages = result['total'] or 0
+    today_packages = result['total'] or 0
 
-print("TODAY PACKAGES =", today_packages)
+    print("TODAY PACKAGES =", today_packages)
 
 
     
