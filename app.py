@@ -365,7 +365,10 @@ WHERE DATE(created_at)=CURRENT_DATE
 AND service='A TIKTOK COINS'
 """)
 
-    today_packages = cursor.fetchone()['total']
+    result = cursor.fetchone()
+today_packages = result['total'] or 0
+
+print("TODAY PACKAGES =", today_packages)
 
 
     
